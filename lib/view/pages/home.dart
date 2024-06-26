@@ -9,8 +9,9 @@ import 'package:rideware_task1/view/pages/list.dart'; // Adjust import as per yo
 
 class Homepage1 extends StatefulWidget {
   final String username;
+  final String userId;
 
-  Homepage1({Key? key, required this.username, required String userId}) : super(key: key);
+  Homepage1({Key? key, required this.username, required this.userId}) : super(key: key);
 
   @override
   State<Homepage1> createState() => _HomePage1State();
