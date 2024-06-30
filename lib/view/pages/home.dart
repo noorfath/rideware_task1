@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:rideware_task1/const.dart'; // Assuming this contains your constants
 import 'package:rideware_task1/controller/modelclass.dart';
+import 'package:rideware_task1/model/routemodel2.dart';
 import 'package:rideware_task1/view/pages/list.dart'; // Adjust import as per your project
 
 class Homepage1 extends StatefulWidget {
@@ -31,22 +32,33 @@ class _HomePage1State extends State<Homepage1> {
 
   Future<void> _fetchRoutes() async {
     final url = 'https://testapi.wideviewers.com/api/Route/GetRouteByUser';
+    final Map<String, dynamic> reqBody = {
+      "userId": 1
+    };
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await http.post(
+        Uri.parse(url),
+        body: jsonEncode(reqBody),
+        headers: {'Content-Type': 'application/json','Accept': '*/*'}
+      );
       if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
-        final List<dynamic> routesData = responseData['data']['result'];
+      final ApiResponse apiResponse = ApiResponse.fromJson(jsonDecode(response.body));
+      if (apiResponse.isValid) {
+        final List<Routes> routes = apiResponse.data; // Access the list of Routes directly
         setState(() {
-          _routes = routesData.map((route) => route['name'].toString()).toList();
+          _routes = routes.map((route) => route.name).toList(); // Extract route names
           if (_routes.isNotEmpty) {
             _selectedRoute = _routes[0]; // Set initial selected route
           }
-          _selectedRegion = routesData[0]['regionName'].toString(); // Update selected region
-          _cityName = routesData[0]['cityName'].toString(); // Update city name
+          // Removed region/city updates as the response format doesn't include them
         });
       } else {
-        print('Failed to load routes');
+        print('API error: ${apiResponse.message}');
+        // Handle API error (show user message)
       }
+    } else {
+      print('Failed to load routes (status code: ${response.statusCode})');
+    }
     } catch (e) {
       print('Error: $e');
     }
