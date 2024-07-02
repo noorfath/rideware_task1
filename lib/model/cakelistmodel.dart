@@ -41,7 +41,7 @@ class Datumm {
     String description;
     String itemcode;
     String type;
-    int price;
+    double price;
     String imgurl;
 
     Datumm({
