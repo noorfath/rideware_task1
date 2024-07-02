@@ -1,20 +1,95 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:rideware_task1/const.dart';
 import 'package:rideware_task1/view/pages/almadina.dart';
 
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: CustomerListPage(),
-  ));
+class Customermodel {
+  bool isValid;
+  String message;
+  List<Datum> data;
+
+  Customermodel({
+    required this.isValid,
+    required this.message,
+    required this.data,
+  });
+
+  factory Customermodel.fromJson(Map<String, dynamic> json) {
+    var list = json['data'] as List;
+    List<Datum> dataList = list.map((i) => Datum.fromJson(i)).toList();
+    return Customermodel(
+      isValid: json['isValid'],
+      message: json['message'],
+      data: dataList,
+    );
+  }
 }
 
-class CustomerListPage extends StatelessWidget {
-  const CustomerListPage({super.key});
+class Datum {
+  int custId;
+  String name;
+  int routeId;
+
+  Datum({
+    required this.custId,
+    required this.name,
+    required this.routeId,
+  });
+
+  factory Datum.fromJson(Map<String, dynamic> json) {
+    return Datum(
+      custId: json['custId'],
+      name: json['name'],
+      routeId: json['routeId'],
+    );
+  }
+}
+
+class CustomerListPage extends StatefulWidget {
+  final int routeId;
+
+  const CustomerListPage({super.key, required this.routeId});
+
+  @override
+  _CustomerListPageState createState() => _CustomerListPageState();
+}
+
+class _CustomerListPageState extends State<CustomerListPage> {
+  List<Datum> _customers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCustomers();
+  }
+
+  Future<void> _fetchCustomers() async {
+    final url = 'https://testapi.wideviewers.com/Customer/GetCustomersByRoute';
+    final Map<String, dynamic> reqBody = {
+      "routeId": widget.routeId // Use the passed routeId
+    };
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        body: jsonEncode(reqBody),
+        headers: {'Content-Type': 'application/json', 'Accept': '*/*'},
+      );
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        final customerResponse = Customermodel.fromJson(responseData);
+        setState(() {
+          _customers = customerResponse.data;
+        });
+      } else {
+        print('Failed to load customers (status code: ${response.statusCode})');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +100,7 @@ class CustomerListPage extends StatelessWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
-          statusBarIconBrightness:
-              Brightness.dark, // Use Brightness.light for white icons
+          statusBarIconBrightness: Brightness.dark, // Use Brightness.light for white icons
         ),
         child: Scaffold(
           backgroundColor: Colors.white,
@@ -121,8 +195,7 @@ class CustomerListPage extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(10),
                                 borderSide: BorderSide.none,
                               ),
-                              contentPadding:
-                                  EdgeInsets.symmetric(vertical: 15.0),
+                              contentPadding: EdgeInsets.symmetric(vertical: 15.0),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10.0),
                                 borderSide: BorderSide.none,
@@ -144,8 +217,7 @@ class CustomerListPage extends StatelessWidget {
                                 textStyle: TextStyle(
                                     color: text1,
                                     fontSize: fontsize * 0.04,
-                                    fontFamily:
-                                        GoogleFonts.poppins().fontFamily),
+                                    fontFamily: GoogleFonts.poppins().fontFamily),
                               ),
                             ),
                             Text(
@@ -164,8 +236,9 @@ class CustomerListPage extends StatelessWidget {
                         ListView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
-                          itemCount: 4,
+                          itemCount: _customers.length,
                           itemBuilder: (context, index) {
+                            final customer = _customers[index];
                             return Card(
                               color: Colors.white,
                               shape: RoundedRectangleBorder(
@@ -175,19 +248,21 @@ class CustomerListPage extends StatelessWidget {
                               margin: EdgeInsets.symmetric(vertical: 10),
                               child: ListTile(
                                 leading: Image.asset(
-                                    'assets/icons/shop (1).png',
-                                    width: 40,
-                                    height: 40),
+                                  'assets/icons/shop (1).png',
+                                  width: 40,
+                                  height: 40
+                                ),
                                 title: Text(
-                                  'Al Arz Bakery',
+                                  customer.name,
                                   style: GoogleFonts.poppins(
                                     textStyle: TextStyle(
-                                        fontSize: fontsize * 0.04,
-                                        color: Colors.black),
+                                      fontSize: fontsize * 0.04,
+                                      color: Colors.black
+                                    ),
                                   ),
                                 ),
                                 subtitle: Text(
-                                  '050 233 3336',
+                                  'Customer ID: ${customer.custId}',
                                   style: GoogleFonts.poppins(
                                     textStyle: TextStyle(
                                       fontSize: fontsize * 0.035,
@@ -196,8 +271,11 @@ class CustomerListPage extends StatelessWidget {
                                   ),
                                 ),
                                 onTap: () {
-                                  Navigator.of(context).push(MaterialPageRoute(
-                                      builder: (context) => Almadina()));
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => Almadina()
+                                    )
+                                  );
                                 },
                               ),
                             );

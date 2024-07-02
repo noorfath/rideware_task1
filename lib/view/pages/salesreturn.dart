@@ -319,11 +319,14 @@ class SalesReturn extends StatelessWidget {
     );
   }
 
-  void _showBottomSheet(BuildContext context) {
+void _showBottomSheet(BuildContext context) {
   int quantity = 1;
   var height = MediaQuery.of(context).size.height;
   var width = MediaQuery.of(context).size.width;
   var fontsize = MediaQuery.of(context).size.width;
+
+  bool isReplacement = false;
+  bool isRefund = false;
 
   showModalBottomSheet(
     context: context,
@@ -337,7 +340,7 @@ class SalesReturn extends StatelessWidget {
           return Container(
             decoration: BoxDecoration(
                 color: Colors.white, borderRadius: BorderRadius.circular(20)),
-            height: 450,
+            height: 500,
             width: double.infinity,
             padding: EdgeInsets.all(16.0),
             child: Column(
@@ -452,18 +455,69 @@ class SalesReturn extends StatelessWidget {
                   color: Colors.white,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Container(height: 120,width: double.infinity,
+                    child: Container(
+                      height: 70,
+                      width: double.infinity,
                       child: TextField(
                         controller: reasonController,
                         maxLines: null,
-                        decoration: InputDecoration(border: InputBorder.none,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
                           enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,),
-                    
-                        
+                          focusedBorder: InputBorder.none,
+                        ),
                       ),
                     ),
                   ),
+                ),
+                // SizedBox(height: 16.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Replacement",
+                      style: TextStyle(
+                        fontSize: fontsize * 0.04,
+                        fontFamily: GoogleFonts.poppins().fontFamily,
+                      ),
+                    ),
+                    Transform.scale(
+                      scale: 0.6,
+                      child: Switch(
+                        value: isReplacement,
+                        onChanged: (value) {
+                          setState(() {
+                            isReplacement = value;
+                            if (isReplacement) isRefund = false; // Toggle refund off if replacement is on
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Refund",
+                      style: TextStyle(
+                        fontSize: fontsize * 0.04,
+                        fontFamily: GoogleFonts.poppins().fontFamily,
+                      ),
+                    ),
+                    Transform.scale(
+                      scale: 0.8,
+                      child: Switch(
+                        value: isRefund,
+                        onChanged: (value) {
+                          setState(() {
+                            isRefund = value;
+                            if (isRefund) isReplacement = false; // Toggle replacement off if refund is on
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 16.0),
                 ElevatedButton(
