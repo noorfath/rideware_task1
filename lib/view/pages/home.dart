@@ -33,7 +33,7 @@ class _HomePage1State extends State<Homepage1> {
   Future<void> _fetchRoutes() async {
     final url = 'https://testapi.wideviewers.com/api/Route/GetRouteByUser';
     final Map<String, dynamic> reqBody = {
-      "userId": 1
+      "userId": int.parse(widget.userId)
     };
     try {
       final response = await http.post(
