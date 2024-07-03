@@ -33,9 +33,8 @@ class _HomePage1State extends State<Homepage1> {
 
   Future<void> _fetchRoutes() async {
     final url = 'https://testapi.wideviewers.com/api/Route/GetRouteByUser';
-    final int userId = int.parse(widget.userId);
     final Map<String, dynamic> reqBody = {
-      "userId": int.parse(widget.userId)
+      "userId": widget.userId
     };
     try {
       final response = await http.post(
@@ -46,11 +45,11 @@ class _HomePage1State extends State<Homepage1> {
       if (response.statusCode == 200) {
       final ApiResponse apiResponse = ApiResponse.fromJson(jsonDecode(response.body));
       if (apiResponse.isValid) {
-        final List<Routes> routes = apiResponse.data; // Access the list of Routes directly
+        routes = apiResponse.data; // Access the list of Routes directly
         setState(() {
           _routes = routes.map((route) => route.name).toList(); // Extract route names
           if (_routes.isNotEmpty) {
-            _selectedRoute = _routes[0]; // Set initial selected route
+            _selectedRoute = routes[0].name; // Set initial selected route
           }
           // Removed region/city updates as the response format doesn't include them
         });
@@ -121,7 +120,7 @@ class _HomePage1State extends State<Homepage1> {
               _selectedRoute = value!;
             });
             Navigator.of(context).pop(); // Close the bottom sheet
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) => CustomerListPage(routeId: 1,)));
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) => CustomerListPage(routeId: int.parse(value!),)));
           },
           contentPadding: EdgeInsets.zero,
         ),
@@ -422,7 +421,9 @@ class _HomePage1State extends State<Homepage1> {
                       backgroundColor: MaterialStateProperty.all<Color>(
                           container1), // Replace with your color constant
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => CustomerListPage(routeId: 1,)));
+                    },
                     child: Text(
                       'More',
                       style: TextStyle(
