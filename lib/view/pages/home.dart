@@ -32,8 +32,9 @@ class _HomePage1State extends State<Homepage1> {
 
   Future<void> _fetchRoutes() async {
     final url = 'https://testapi.wideviewers.com/api/Route/GetRouteByUser';
+    final int userId = int.parse(widget.userId);
     final Map<String, dynamic> reqBody = {
-      "userId": int.parse(widget.userId)
+      "userId": userId
     };
     try {
       final response = await http.post(
@@ -42,23 +43,23 @@ class _HomePage1State extends State<Homepage1> {
         headers: {'Content-Type': 'application/json','Accept': '*/*'}
       );
       if (response.statusCode == 200) {
-      final ApiResponse apiResponse = ApiResponse.fromJson(jsonDecode(response.body));
-      if (apiResponse.isValid) {
-        final List<Routes> routes = apiResponse.data; // Access the list of Routes directly
-        setState(() {
-          _routes = routes.map((route) => route.name).toList(); // Extract route names
-          if (_routes.isNotEmpty) {
-            _selectedRoute = _routes[0]; // Set initial selected route
-          }
-          // Removed region/city updates as the response format doesn't include them
-        });
+        final ApiResponse apiResponse = ApiResponse.fromJson(jsonDecode(response.body));
+        if (apiResponse.isValid) {
+          final List<Routes> routes = apiResponse.data; // Access the list of Routes directly
+          setState(() {
+            _routes = routes.map((route) => route.name).toList(); // Extract route names
+            if (_routes.isNotEmpty) {
+              _selectedRoute = _routes[0]; // Set initial selected route
+            }
+            // Removed region/city updates as the response format doesn't include them
+          });
+        } else {
+          print('API error: ${apiResponse.message}');
+          // Handle API error (show user message)
+        }
       } else {
-        print('API error: ${apiResponse.message}');
-        // Handle API error (show user message)
+        print('Failed to load routes (status code: ${response.statusCode})');
       }
-    } else {
-      print('Failed to load routes (status code: ${response.statusCode})');
-    }
     } catch (e) {
       print('Error: $e');
     }
@@ -118,7 +119,6 @@ class _HomePage1State extends State<Homepage1> {
             setState(() {
               _selectedRoute = value!;
             });
-            Navigator.of(context).pop(); // Close the bottom sheet
             Navigator.of(context).push(MaterialPageRoute(builder: (context) => CustomerListPage(routeId: 1,)));
           },
           contentPadding: EdgeInsets.zero,
@@ -420,9 +420,7 @@ class _HomePage1State extends State<Homepage1> {
                       backgroundColor: MaterialStateProperty.all<Color>(
                           container1), // Replace with your color constant
                     ),
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => CustomerListPage(routeId: 1,)));
-                    },
+                    onPressed: () {},
                     child: Text(
                       'More',
                       style: TextStyle(
