@@ -235,12 +235,18 @@ class _ItemListPageState extends State<ItemListPage> {
                           padding: const EdgeInsets.all(16.0),
                           child: Row(
                             children: [
-                              Image.network(
-                                items[index].imgurl,
-                                height: 80,
-                                width: 80,
-                                fit: BoxFit.cover,
-                              ),
+                              // Image.network(
+                              //   items[index].imgurl,
+                              //   height: 80,
+                              //   width: 80,
+                              //   fit: BoxFit.cover,
+                              // ),
+                              Image.asset(
+                                    'assets/images/cake.jpg',
+                                    height: 80,
+                                    width: 80,
+                                    fit: BoxFit.cover,
+                                  ),
                               SizedBox(width: 16),
                               Expanded(
                                 child: Column(
