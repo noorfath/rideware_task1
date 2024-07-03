@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:rideware_task1/const.dart';
 import 'package:rideware_task1/model/cakelistmodel.dart';
 import 'package:rideware_task1/model/categorymodel.dart';
 import 'package:rideware_task1/view/pages/cakeOrder.dart';
 import 'package:rideware_task1/view/pages/cart.dart';
-import 'package:http/http.dart' as http;
 
 void main() {
   runApp(MaterialApp(
@@ -80,6 +80,14 @@ class _ItemListPageState extends State<ItemListPage> {
       }
     } catch (e) {
       print('Error: $e');
+    }
+  }
+
+  List<Datumm> getFilteredItems() {
+    if (selectedCategory == 'ALL') {
+      return items;
+    } else {
+      return items.where((item) => item.categoryId == categories.indexOf(selectedCategory)).toList();
     }
   }
 
@@ -222,7 +230,7 @@ class _ItemListPageState extends State<ItemListPage> {
                   child: ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
-                    itemCount: items.length,
+                    itemCount: getFilteredItems().length,
                     itemBuilder: (context, index) {
                       return Card(
                         color: Colors.white,
@@ -235,18 +243,12 @@ class _ItemListPageState extends State<ItemListPage> {
                           padding: const EdgeInsets.all(16.0),
                           child: Row(
                             children: [
-                              // Image.network(
-                              //   items[index].imgurl,
-                              //   height: 80,
-                              //   width: 80,
-                              //   fit: BoxFit.cover,
-                              // ),
                               Image.asset(
-                                    'assets/images/cake.jpg',
-                                    height: 80,
-                                    width: 80,
-                                    fit: BoxFit.cover,
-                                  ),
+                                'assets/images/cake.jpg',
+                                height: 80,
+                                width: 80,
+                                fit: BoxFit.cover,
+                              ),
                               SizedBox(width: 16),
                               Expanded(
                                 child: Column(
@@ -256,7 +258,7 @@ class _ItemListPageState extends State<ItemListPage> {
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          items[index].name,
+                                          getFilteredItems()[index].name,
                                           style: TextStyle(
                                             fontSize: fontsize * 0.04,
                                             fontWeight: FontWeight.w800,
@@ -265,7 +267,7 @@ class _ItemListPageState extends State<ItemListPage> {
                                       ],
                                     ),
                                     Text(
-                                      'AED ${items[index].price}',
+                                      'AED ${getFilteredItems()[index].price}',
                                       style: TextStyle(
                                         fontSize: fontsize * 0.04,
                                         fontFamily: GoogleFonts.poppins().fontFamily,
@@ -273,7 +275,7 @@ class _ItemListPageState extends State<ItemListPage> {
                                       ),
                                     ),
                                     Text(
-                                      items[index].description,
+                                      getFilteredItems()[index].description,
                                       style: TextStyle(
                                         fontSize: fontsize * 0.03,
                                         fontFamily: GoogleFonts.poppins().fontFamily,
