@@ -71,7 +71,6 @@ class _SignupScreenState extends State<SignupScreen> {
               userId: userId, // Pass userId to Homepage1
             )),
           );
-          print(userId);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Login failed: Empty response')),
@@ -231,7 +230,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           hintStyle: TextStyle(
                             fontSize: fontsize * 0.03,
                             fontFamily: "poppins",
-                            color: text2
+                            color: text2,
                           ),
                           border: OutlineInputBorder(
                             borderSide: BorderSide.none,
@@ -287,6 +286,7 @@ class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(context)
-      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
   }
 }
