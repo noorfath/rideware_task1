@@ -27,8 +27,10 @@ class LoginProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         // Handle successful login
+        final Map<String, dynamic> responseBody = jsonDecode(response.body);
+        final id = responseBody['userId'];
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => Homepage1(username: username, userId: '',)),
+          MaterialPageRoute(builder: (context) => Homepage1(username: username, userId: id,)),
         );
       } else {
         // Handle error

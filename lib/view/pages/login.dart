@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/io_client.dart';
 import 'package:rideware_task1/const.dart';
+import 'package:rideware_task1/model/loginmodel.dart';
 import 'package:rideware_task1/view/pages/home.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -57,9 +58,9 @@ class _SignupScreenState extends State<SignupScreen> {
       print('Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> responseBody = jsonDecode(response.body);
-        if (responseBody.isNotEmpty) {
-          final String userId = responseBody['userId'].toString(); // Extract userId
+        final LoginApiResponse responseBody = LoginApiResponse.fromJson(jsonDecode(response.body));
+        if (responseBody.isValid) {
+          final int userId = responseBody.data.user.id; // Extract userId
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Login successful')),
           );
@@ -120,7 +121,7 @@ class _SignupScreenState extends State<SignupScreen> {
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseBody = jsonDecode(response.body);
       if (responseBody.isNotEmpty) {
-        final String userId = responseBody['userId'].toString(); // Extract userId
+        final int userId = responseBody['userId']; // Extract userId
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Login successful')),
         );

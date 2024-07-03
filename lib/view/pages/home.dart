@@ -10,7 +10,7 @@ import 'package:rideware_task1/view/pages/list.dart'; // Adjust import as per yo
 
 class Homepage1 extends StatefulWidget {
   final String username;
-  final String userId;
+  final int userId;
 
   Homepage1({Key? key, required this.username, required this.userId}) : super(key: key);
 
@@ -23,6 +23,7 @@ class _HomePage1State extends State<Homepage1> {
   String _selectedRegion = '';
   String _cityName = ''; // Add a field to store the city name
   List<String> _routes = [];
+  List<Routes> routes = [];
 
   @override
   void initState() {
@@ -34,7 +35,7 @@ class _HomePage1State extends State<Homepage1> {
     final url = 'https://testapi.wideviewers.com/api/Route/GetRouteByUser';
     final int userId = int.parse(widget.userId);
     final Map<String, dynamic> reqBody = {
-      "userId": userId
+      "userId": int.parse(widget.userId)
     };
     try {
       final response = await http.post(
@@ -43,23 +44,23 @@ class _HomePage1State extends State<Homepage1> {
         headers: {'Content-Type': 'application/json','Accept': '*/*'}
       );
       if (response.statusCode == 200) {
-        final ApiResponse apiResponse = ApiResponse.fromJson(jsonDecode(response.body));
-        if (apiResponse.isValid) {
-          final List<Routes> routes = apiResponse.data; // Access the list of Routes directly
-          setState(() {
-            _routes = routes.map((route) => route.name).toList(); // Extract route names
-            if (_routes.isNotEmpty) {
-              _selectedRoute = _routes[0]; // Set initial selected route
-            }
-            // Removed region/city updates as the response format doesn't include them
-          });
-        } else {
-          print('API error: ${apiResponse.message}');
-          // Handle API error (show user message)
-        }
+      final ApiResponse apiResponse = ApiResponse.fromJson(jsonDecode(response.body));
+      if (apiResponse.isValid) {
+        final List<Routes> routes = apiResponse.data; // Access the list of Routes directly
+        setState(() {
+          _routes = routes.map((route) => route.name).toList(); // Extract route names
+          if (_routes.isNotEmpty) {
+            _selectedRoute = _routes[0]; // Set initial selected route
+          }
+          // Removed region/city updates as the response format doesn't include them
+        });
       } else {
-        print('Failed to load routes (status code: ${response.statusCode})');
+        print('API error: ${apiResponse.message}');
+        // Handle API error (show user message)
       }
+    } else {
+      print('Failed to load routes (status code: ${response.statusCode})');
+    }
     } catch (e) {
       print('Error: $e');
     }
@@ -98,7 +99,7 @@ class _HomePage1State extends State<Homepage1> {
                 ],
               ),
               Column(
-                children: _routes.map((route) => _buildRadioOption(route, fontsize * 0.02)).toList(),
+                children: routes.map((route) => _buildRadioOption(route, fontsize * 0.02)).toList(),
               ),
             ],
           ),
@@ -107,18 +108,19 @@ class _HomePage1State extends State<Homepage1> {
     );
   }
 
-  Widget _buildRadioOption(String route, double fontsize) {
+  Widget _buildRadioOption(Routes route, double fontsize) {
     return Column(
       children: [
         RadioListTile<String>(
-          title: Text(route),
+          title: Text(route.name),
           activeColor: container1,
-          value: route,
+          value: route.routeId.toString(),
           groupValue: _selectedRoute,
           onChanged: (String? value) {
             setState(() {
               _selectedRoute = value!;
             });
+            Navigator.of(context).pop(); // Close the bottom sheet
             Navigator.of(context).push(MaterialPageRoute(builder: (context) => CustomerListPage(routeId: 1,)));
           },
           contentPadding: EdgeInsets.zero,
