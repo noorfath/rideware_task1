@@ -506,7 +506,7 @@ void _showBottomSheet(BuildContext context) {
                       ),
                     ),
                     Transform.scale(
-                      scale: 0.8,
+                      scale: 0.6,
                       child: Switch(
                         value: isRefund,
                         onChanged: (value) {

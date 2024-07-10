@@ -79,7 +79,7 @@ class ReturnSalesPageState extends State<ReturnSalesPage> {
                               child: CircleAvatar(
                                 radius: 20,
                                 backgroundImage: AssetImage(
-                                    'assets/images/profile man.png.jpg'),
+                                    'assets/images/profile man.png'),
                               ),
                             ),
                             SizedBox(width: 5),
