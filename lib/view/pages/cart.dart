@@ -334,56 +334,62 @@ class _CartState extends State<Cart> {
                           ],
                         ),
                       ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: ElevatedButton(
-                      onPressed: placeOrder,
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white, backgroundColor: appbarcolor,
-                        padding: EdgeInsets.symmetric(vertical: 16.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                      SizedBox(height: 16),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          child: Text(
+                            'Place Order',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: container1, // Dark red color
+                           
+                            textStyle: TextStyle(fontSize: fontsize * 0.03),
+                            minimumSize: Size(140, 30),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  5), // Add border radius here
+                            ),
+                          ),
                         ),
                       ),
-                      child: Text(
-                        'Place Order',
-                        style: TextStyle(
-                          fontSize: fontsize * 0.045,
-                          fontFamily: GoogleFonts.poppins().fontFamily,
-                        ),
-                      ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget buildSummaryRow(String label, double amount, int index) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+  Widget buildSummaryRow(String title, int amount, int index) {
+    return Container(
+      color: index % 2 == 0 ? Colors.white : Colors.grey[300],
+      padding: EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0),
+            child: Text(
+              title,
+              style: TextStyle(
+                  fontSize: 14,
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                  color: text1),
             ),
           ),
-          Text(
-            '\$${amount.toStringAsFixed(2)}',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: (index == 2) ? Colors.green : null,
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: Text(
+              'AED $amount',
+              style: TextStyle(
+                  fontSize: 16,
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                  color: container1),
             ),
           ),
         ],
@@ -393,90 +399,161 @@ class _CartState extends State<Cart> {
 
  Widget buildCartItem(
     String title,
-    double price,
+    int price,
     int quantity,
     int index,
     void Function(int) incrementQuantity,
     void Function(int) decrementQuantity,
   ) {
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+    return Container(
+      height: 177,
+      child: Card(
+        color: Colors.white,
+        elevation: 2,
+        margin: EdgeInsets.symmetric(
+            vertical: 2.5, horizontal: 5), // Adjust margin for spacing
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(4.0), // Adjust padding inside the card
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left:14.0),
+                        child: Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 14, // Reduced font size
+                            fontFamily: GoogleFonts.poppins().fontFamily,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left:14.0),
+                        child: Text(
+                          'AED $price',
+                          style: TextStyle(
+                              fontSize: 12, // Reduced font size
+                              fontWeight: FontWeight.bold,
+                              fontFamily: GoogleFonts.poppins().fontFamily,
+                              color: container1),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                Text(
-                  quantity.toString().padLeft(2, '0'),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
-            Text(
-              'AED ${price.toStringAsFixed(2)}',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
-            ),
-            Divider(height: 24, thickness: 1),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    // Function to remove the item can be added here
-                  },
-                  child: Text(
-                    'Remove',
-                    style: TextStyle(
-                      color: Colors.red,
+                  Padding(
+                    padding: const EdgeInsets.only(right:8.0),
+                    child: Row(
+                      children: [
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.keyboard_arrow_up_rounded),
+                              onPressed: () => incrementQuantity(index),
+                              iconSize: 20, // Reduced icon size
+                              padding: EdgeInsets.all(0),
+                              constraints: BoxConstraints(),
+                            ),
+                            Text(
+                              quantity.toString().padLeft(2, '0'),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.keyboard_arrow_down_rounded),
+                              onPressed: () => decrementQuantity(index),
+                              iconSize: 20, // Reduced icon size
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                Text(
-                  'Total Price AED ${(price * quantity).toStringAsFixed(2)}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red,
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                        padding: const EdgeInsets.only(left:8.0),
+                    child: TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        'Remove',
+                        style: TextStyle(
+                          color: container1,
+                          fontFamily: GoogleFonts.poppins().fontFamily,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 8), // Reduced padding
+                        minimumSize: Size(10, 20), // Reduced minimum size
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.remove),
-                  onPressed: () => decrementQuantity(index),
-                ),
-                IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: () => incrementQuantity(index),
-                ),
-              ],
-            ),
-          ],
+                  Row(
+                    children: [
+                      Text(
+                        'Total Price ',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: GoogleFonts.poppins().fontFamily,
+                          color: appbarcolor,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right:10.0),
+                        child: Text(
+                          ' AED ${price * quantity}',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontFamily: GoogleFonts.poppins().fontFamily,
+                            color: container1,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget buildSummaryRow(String title, double amount, int index) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
+            ),
+          ),
+          Text(
+            'AED ${amount.toStringAsFixed(2)}', // Adjust as necessary for int or double
+            style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
+            ),
+          ),
+        ],
       ),
     );
   }

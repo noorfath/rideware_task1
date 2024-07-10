@@ -531,3 +531,136 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
     );
   }
 }
+
+class BottomSheetContent extends StatefulWidget {
+  final double fontsize;
+  final Datumm selectedDatum;
+
+  BottomSheetContent({required this.fontsize, required this.selectedDatum});
+
+  @override
+  _BottomSheetContentState createState() => _BottomSheetContentState();
+}
+
+class _BottomSheetContentState extends State<BottomSheetContent> {
+  int quantity = 1;
+  late TextEditingController _priceController;
+
+  @override
+  void initState() {
+    super.initState();
+    _priceController =
+        TextEditingController(text: widget.selectedDatum.price.toString());
+  }
+
+  void _incrementQuantity() {
+    setState(() {
+      quantity++;
+    });
+  }
+
+  void _decrementQuantity() {
+    if (quantity > 1) {
+      setState(() {
+        quantity--;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _priceController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      height: 400,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.selectedDatum.name,
+            style: TextStyle(
+              fontSize: widget.fontsize * 0.06,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8),
+          TextField(
+            controller: _priceController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: 'Price (AED)',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            widget.selectedDatum.description,
+            style: TextStyle(
+              fontSize: widget.fontsize * 0.04,
+            ),
+          ),
+          SizedBox(height: 16),
+          Row(
+            children: [
+              Text(
+                'Quantity:',
+                style: TextStyle(
+                  fontSize: widget.fontsize * 0.05,
+                ),
+              ),
+              SizedBox(width: 16),
+              IconButton(
+                onPressed: _decrementQuantity,
+                icon: Icon(Icons.remove),
+              ),
+              Text(
+                '$quantity',
+                style: TextStyle(
+                  fontSize: widget.fontsize * 0.05,
+                ),
+              ),
+              IconButton(
+                onPressed: _incrementQuantity,
+                icon: Icon(Icons.add),
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+          Center(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => Cart(
+                    initialItems: [
+                      Item(
+                        title: widget.selectedDatum.name,
+                        price: double.parse(
+                            _priceController.text), // Use the entered price
+                        quantity: quantity,
+                      )
+                    ],
+                  ),
+                ));
+              },
+              child: Text(
+                'Go to Cart',
+                style: TextStyle(
+                  fontSize: widget.fontsize * 0.05,
+                  color: Colors.white,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: appbarcolor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

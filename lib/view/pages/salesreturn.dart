@@ -40,7 +40,7 @@ class SalesReturn extends StatelessWidget {
               ),
             ),
             backgroundColor: appbarcolor,
-            leading:  IconButton(
+            leading: IconButton(
               icon: Icon(
                 Icons.arrow_back_ios_new_rounded,
                 color: Colors.white,
@@ -157,66 +157,6 @@ class SalesReturn extends StatelessWidget {
                 ),
               ),
             ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      offset: Offset(0, -1),
-                      blurRadius: 10,
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Strawberry',
-                          style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                              fontSize: fontsize * 0.04,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          'Quantity: 4',
-                          style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                              fontSize: fontsize * 0.035,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        _showBottomSheet(context);
-                      },
-                      icon: Icon(
-                        Icons.add_shopping_cart,
-                        color: Colors.white,
-                      ),
-                      label: Text('Add to Cart',
-                          style: TextStyle(color: Colors.white)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: appbarcolor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -225,8 +165,7 @@ class SalesReturn extends StatelessWidget {
 
   Widget buildCustomerListView(BuildContext context, double fontsize) {
     return ListView.builder(
-      physics:
-          NeverScrollableScrollPhysics(), // To prevent scrolling inside SingleChildScrollView
+      physics: NeverScrollableScrollPhysics(), // To prevent scrolling inside SingleChildScrollView
       shrinkWrap: true, // To allow ListView to take minimum space needed
       itemCount: 4,
       itemBuilder: (context, index) {
@@ -237,89 +176,83 @@ class SalesReturn extends StatelessWidget {
           ),
           elevation: 5,
           margin: EdgeInsets.symmetric(vertical: 10),
-          child: Column(
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.all(10),
-                title: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          child: ListTile(
+            contentPadding: EdgeInsets.all(10),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Item : Strawberry',
-                              style: GoogleFonts.poppins(
-                                textStyle: TextStyle(
-                                  fontSize: fontsize * 0.035,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              'Unit Price: \$25.00',
-                              style: GoogleFonts.poppins(
-                                textStyle: TextStyle(
-                                  fontSize: fontsize * 0.035,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              'Total Price: \$100.00',
-                              style: GoogleFonts.poppins(
-                                textStyle: TextStyle(
-                                  fontSize: fontsize * 0.035,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                          ],
+                    Text(
+                      'Item: Strawberry',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                          fontSize: fontsize * 0.035,
+                          color: Colors.black,
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              'Quantity: 4',
-                              style: GoogleFonts.poppins(
-                                textStyle: TextStyle(
-                                  fontSize: fontsize * 0.035,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              'Return',
-                              style: GoogleFonts.poppins(
-                                textStyle: TextStyle(
-                                  fontSize: fontsize * 0.035,
-                                  color: Colors.red,
-                                ),
-                              ),
-                            ),
-                          ],
+                      ),
+                    ),
+                    Text(
+                      'Quantity: 4',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                          fontSize: fontsize * 0.035,
+                          color: Colors.black,
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
-                // onTap: () {
-                //   Navigator.of(context).push(
-                //     MaterialPageRoute(builder: (context) => Almadina()),
-                //   );
-                // },
-              ),
-            ],
+                SizedBox(height: 5),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Unit Price: \$25.00',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                          fontSize: fontsize * 0.035,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        _showBottomSheet(context);
+                      },
+                      child: Text(
+                        'Return Item',
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontFamily: "poppins",
+                          fontSize: fontsize * 0.04,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 5),
+                Text(
+                  'Total Price: \$100.00',
+                  style: GoogleFonts.poppins(
+                    textStyle: TextStyle(
+                      fontSize: fontsize * 0.035,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-void _showBottomSheet(BuildContext context) {
+ void _showBottomSheet(BuildContext context) {
+  TextEditingController reasonController = TextEditingController();
+  TextEditingController remarksController = TextEditingController();
   int quantity = 1;
   var height = MediaQuery.of(context).size.height;
   var width = MediaQuery.of(context).size.width;
@@ -330,168 +263,89 @@ void _showBottomSheet(BuildContext context) {
 
   showModalBottomSheet(
     context: context,
+    isScrollControlled: true,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+    ),
     builder: (context) {
       return StatefulBuilder(
-        builder: (context, setState) {
-          double unitPrice = 99.99;
-          double totalPrice = unitPrice * quantity;
-          TextEditingController reasonController = TextEditingController();
-
-          return Container(
-            decoration: BoxDecoration(
-                color: Colors.white, borderRadius: BorderRadius.circular(20)),
-            height: 500,
-            width: double.infinity,
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Card(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        // Image on the left side
-                        Container(
-                          width: 100.0,
-                          height: 100.0,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8.0),
-                            image: DecorationImage(
-                              image: AssetImage("assets/images/cake.jpg"),
-                              fit: BoxFit.cover,
+        builder: (BuildContext context, StateSetter setState) {
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 16,
+              right: 16,
+              top: 16,
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    'Vanilla Cake',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          'Reason',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 5,
+                        child: TextField(
+                          controller: reasonController,
+                          decoration: InputDecoration(contentPadding: EdgeInsets.all(8.0),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0),
                             ),
                           ),
                         ),
-                        SizedBox(width: 16.0),
-                        // Name and price on the right side
-                        Flexible(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Product Name',
-                                style: TextStyle(
-                                  fontSize: fontsize * 0.04,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 8.0),
-                              Text(
-                                '\$$unitPrice',
-                                style: TextStyle(
-                                  fontSize: fontsize * 0.04,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                              SizedBox(height: 16.0),
-                              Row(
-                                children: [
-                                  Text(
-                                    'Total: \$${totalPrice.toStringAsFixed(2)}',
-                                    style: TextStyle(
-                                      fontSize: fontsize * 0.04,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 8.0,
-                                  ),
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.remove,
-                                      size: 20,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        if (quantity > 1) {
-                                          quantity--;
-                                        }
-                                        totalPrice = unitPrice * quantity;
-                                      });
-                                    },
-                                  ),
-                                  Text(
-                                    '$quantity',
-                                    style: TextStyle(
-                                      fontSize: fontsize * 0.03,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.add,
-                                      size: 20,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        quantity++;
-                                        totalPrice = unitPrice * quantity;
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          'Remarks',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 5,
+                        child: TextField(
+                          controller: remarksController,
+                          decoration: InputDecoration(contentPadding: EdgeInsets.all(8.0),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                            ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: 16.0),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Reason for return",
-                    style: TextStyle(
-                      fontSize: fontsize * 0.04,
-                      fontFamily: GoogleFonts.poppins().fontFamily,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 8.0),
-                Card(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      height: 70,
-                      width: double.infinity,
-                      child: TextField(
-                        controller: reasonController,
-                        maxLines: null,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ),
-                // SizedBox(height: 16.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Replacement",
-                      style: TextStyle(
-                        fontSize: fontsize * 0.04,
-                        fontFamily: GoogleFonts.poppins().fontFamily,
-                      ),
-                    ),
-                    Transform.scale(
-                      scale: 0.6,
-                      child: Switch(
+                  SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Checkbox(
                         value: isReplacement,
                         onChanged: (value) {
                           setState(() {
-                            isReplacement = value;
-                            if (isReplacement) isRefund = false; // Toggle refund off if replacement is on
+                            isReplacement = value!;
                           });
                         },
                       ),
+<<<<<<< HEAD
                     ),
                   ],
                 ),
@@ -508,37 +362,67 @@ void _showBottomSheet(BuildContext context) {
                     Transform.scale(
                       scale: 0.6,
                       child: Switch(
+=======
+                      Text('Replacement'),
+                      SizedBox(width: 32),
+                      Checkbox(
+>>>>>>> 109c91722b2639c3609bf887f290baafe47cd005
                         value: isRefund,
                         onChanged: (value) {
                           setState(() {
-                            isRefund = value;
-                            if (isRefund) isReplacement = false; // Toggle replacement off if refund is on
+                            isRefund = value!;
                           });
                         },
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16.0),
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle save action
-                    String reason = reasonController.text;
-                    // Implement your save logic here
-                    Navigator.pop(context);
-                  },
-                  child: Text(
-                    'Save',
-                    style: TextStyle(color: Colors.white),
+                      Text('Refund'),
+                    ],
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: appbarcolor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Quantity',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.remove),
+                            onPressed: () {
+                              setState(() {
+                                if (quantity > 1) {
+                                  quantity--;
+                                }
+                              });
+                            },
+                          ),
+                          Text(
+                            quantity.toString(),
+                            style: TextStyle(fontSize: 18),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.add),
+                            onPressed: () {
+                              setState(() {
+                                quantity++;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Handle form submission logic here
+                      Navigator.pop(context);
+                    },
+                    child: Text('Submit'),
+                  ),
+                ],
+              ),
             ),
           );
         },
