@@ -334,199 +334,93 @@ class _CartState extends State<Cart> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 16),
-                      Center(
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          child: Text(
-                            'Place Order',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: container1, // Dark red color
-                           
-                            textStyle: TextStyle(fontSize: fontsize * 0.03),
-                            minimumSize: Size(140, 30),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  5), // Add border radius here
-                            ),
-                          ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: ElevatedButton(
+                      onPressed: placeOrder,
+                      child: Text(
+                        'Place Order',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: GoogleFonts.poppins().fontFamily,
                         ),
                       ),
-                    ],
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: container1, // Replace with your button color
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 0.03),
+                        minimumSize: Size(140, 30),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
-  Widget buildSummaryRow(String title, int amount, int index) {
-    return Container(
-      color: index % 2 == 0 ? Colors.white : Colors.grey[300],
-      padding: EdgeInsets.symmetric(vertical: 6.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 16.0),
-            child: Text(
-              title,
-              style: TextStyle(
-                  fontSize: 14,
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                  color: text1),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Text(
-              'AED $amount',
-              style: TextStyle(
-                  fontSize: 16,
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                  color: container1),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
- Widget buildCartItem(
+  Widget buildCartItem(
     String title,
-    int price,
+    double price, // Use double here
     int quantity,
     int index,
     void Function(int) incrementQuantity,
     void Function(int) decrementQuantity,
   ) {
-    return Container(
-      height: 177,
-      child: Card(
-        color: Colors.white,
-        elevation: 2,
-        margin: EdgeInsets.symmetric(
-            vertical: 2.5, horizontal: 5), // Adjust margin for spacing
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(4.0), // Adjust padding inside the card
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left:14.0),
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: 14, // Reduced font size
-                            fontFamily: GoogleFonts.poppins().fontFamily,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left:14.0),
-                        child: Text(
-                          'AED $price',
-                          style: TextStyle(
-                              fontSize: 12, // Reduced font size
-                              fontWeight: FontWeight.bold,
-                              fontFamily: GoogleFonts.poppins().fontFamily,
-                              color: container1),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right:8.0),
-                    child: Row(
-                      children: [
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.keyboard_arrow_up_rounded),
-                              onPressed: () => incrementQuantity(index),
-                              iconSize: 20, // Reduced icon size
-                              padding: EdgeInsets.all(0),
-                              constraints: BoxConstraints(),
-                            ),
-                            Text(
-                              quantity.toString().padLeft(2, '0'),
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.keyboard_arrow_down_rounded),
-                              onPressed: () => decrementQuantity(index),
-                              iconSize: 20, // Reduced icon size
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+    return Card(
+      elevation: 4,
+      margin: EdgeInsets.symmetric(vertical: 5, horizontal: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: ListTile(
+          leading: CircleAvatar(
+            backgroundColor: container1, // Replace with your circle avatar color
+            child: Text(
+              quantity.toString(),
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: GoogleFonts.poppins().fontFamily,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Padding(
-                        padding: const EdgeInsets.only(left:8.0),
-                    child: TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        'Remove',
-                        style: TextStyle(
-                          color: container1,
-                          fontFamily: GoogleFonts.poppins().fontFamily,
-                        ),
-                      ),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 8), // Reduced padding
-                        minimumSize: Size(10, 20), // Reduced minimum size
-                      ),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        'Total Price ',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontFamily: GoogleFonts.poppins().fontFamily,
-                          color: appbarcolor,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(right:10.0),
-                        child: Text(
-                          ' AED ${price * quantity}',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontFamily: GoogleFonts.poppins().fontFamily,
-                            color: container1,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+            ),
+          ),
+          title: Text(
+            title,
+            style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
+            ),
+          ),
+          subtitle: Text(
+            'AED ${price.toStringAsFixed(2)}', // Adjust as necessary for int or double
+            style: TextStyle(
+              fontFamily: GoogleFonts.poppins().fontFamily,
+            ),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(Icons.remove_circle_outline_rounded),
+                onPressed: () => decrementQuantity(index),
+              ),
+              Text(
+                quantity.toString(),
+                style: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.add_circle_outline_rounded),
+                onPressed: () => incrementQuantity(index),
               ),
             ],
           ),
