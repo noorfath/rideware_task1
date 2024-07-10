@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:rideware_task1/const.dart';
 import 'package:rideware_task1/model/cakelistmodel.dart';
 import 'package:rideware_task1/model/categorymodel.dart';
-import 'package:rideware_task1/view/pages/cakeOrder.dart';
 import 'package:rideware_task1/view/pages/cart.dart';
-import 'package:http/http.dart' as http;
 
 void main() {
   runApp(MaterialApp(
@@ -23,8 +24,10 @@ class ItemListPage extends StatefulWidget {
 
 class _ItemListPageState extends State<ItemListPage> {
   List<Datumm> items = [];
+
   List<String> categories = ['ALL'];
   String selectedCategory = 'ALL';
+  int quantity = 1;
 
   @override
   void initState() {
@@ -46,12 +49,15 @@ class _ItemListPageState extends State<ItemListPage> {
 
       if (response.statusCode == 200) {
         print('API call successful');
-        final Categorymodel categoryModel = categorymodelFromJson(response.body);
+        final Categorymodel categoryModel =
+            categorymodelFromJson(response.body);
         setState(() {
-          categories.addAll(categoryModel.data.map((category) => category.name).toList());
+          categories.addAll(
+              categoryModel.data.map((category) => category.name).toList());
         });
       } else {
-        print('Failed to load categories (status code: ${response.statusCode})');
+        print(
+            'Failed to load categories (status code: ${response.statusCode})');
       }
     } catch (e) {
       print('Error: $e');
@@ -71,7 +77,8 @@ class _ItemListPageState extends State<ItemListPage> {
 
       if (response.statusCode == 200) {
         print('API call successful');
-        final Cakelistmodel cakelistModel = cakelistmodelFromJson(response.body);
+        final Cakelistmodel cakelistModel =
+            cakelistmodelFromJson(response.body);
         setState(() {
           items = cakelistModel.data;
         });
@@ -83,6 +90,29 @@ class _ItemListPageState extends State<ItemListPage> {
     }
   }
 
+  List<Datumm> getFilteredItems() {
+    if (selectedCategory == 'ALL') {
+      return items;
+    } else {
+      return items
+          .where(
+              (item) => item.categoryId == categories.indexOf(selectedCategory))
+          .toList();
+    }
+  }
+
+  void _showBottomSheet(Datumm selectedDatum) {
+    var fontsize = MediaQuery.of(context).size.width;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return BottomSheetContent(
+            fontsize: fontsize, selectedDatum: selectedDatum);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
@@ -92,7 +122,8 @@ class _ItemListPageState extends State<ItemListPage> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark, // Use Brightness.light for white icons
+        statusBarIconBrightness:
+            Brightness.dark, // Use Brightness.light for white icons
       ),
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -112,7 +143,11 @@ class _ItemListPageState extends State<ItemListPage> {
             actions: [
               IconButton(
                 onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => cart()));
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => Cart(
+                      initialItems: [],
+                    ),
+                  ));
                 },
                 icon: Icon(Icons.shopping_cart_rounded),
                 color: Colors.white,
@@ -147,7 +182,8 @@ class _ItemListPageState extends State<ItemListPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(top: 60.0, right: 30, left: 30),
+                        padding: const EdgeInsets.only(
+                            top: 60.0, right: 30, left: 30),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -157,7 +193,8 @@ class _ItemListPageState extends State<ItemListPage> {
                                   contentPadding: EdgeInsets.all(5.0),
                                   hintText: 'Search',
                                   hintStyle: TextStyle(
-                                    fontFamily: GoogleFonts.poppins().fontFamily,
+                                    fontFamily:
+                                        GoogleFonts.poppins().fontFamily,
                                     fontSize: fontsize * 0.03,
                                   ),
                                   prefixIcon: Icon(
@@ -174,24 +211,25 @@ class _ItemListPageState extends State<ItemListPage> {
                               ),
                             ),
                             SizedBox(width: 2),
-                            ElevatedButton(
-                              onPressed: () {},
-                              child: Text(
-                                '+ Add',
-                                style: TextStyle(
-                                  fontFamily: GoogleFonts.poppins().fontFamily,
-                                  fontSize: fontsize * 0.04,
-                                  color: appbarcolor,
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                fixedSize: Size(100, 45),
-                                backgroundColor: Colors.white, // Replace with your color
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            ),
+                            // ElevatedButton(
+                            //   onPressed: () {},
+                            //   child: Text(
+                            //     '+ Add',
+                            //     style: TextStyle(
+                            //       fontFamily: GoogleFonts.poppins().fontFamily,
+                            //       fontSize: fontsize * 0.04,
+                            //       color: appbarcolor,
+                            //     ),
+                            //   ),
+                            //   style: ElevatedButton.styleFrom(
+                            //     fixedSize: Size(100, 45),
+                            //     backgroundColor:
+                            //         Colors.white, // Replace with your color
+                            //     shape: RoundedRectangleBorder(
+                            //       borderRadius: BorderRadius.circular(10),
+                            //     ),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
@@ -203,6 +241,7 @@ class _ItemListPageState extends State<ItemListPage> {
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: categories.map((category) {
                       return CategoryButton(
                         text: category,
@@ -222,7 +261,7 @@ class _ItemListPageState extends State<ItemListPage> {
                   child: ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
-                    itemCount: items.length,
+                    itemCount: getFilteredItems().length,
                     itemBuilder: (context, index) {
                       return Card(
                         color: Colors.white,
@@ -235,48 +274,46 @@ class _ItemListPageState extends State<ItemListPage> {
                           padding: const EdgeInsets.all(16.0),
                           child: Row(
                             children: [
-                              // Image.network(
-                              //   items[index].imgurl,
-                              //   height: 80,
-                              //   width: 80,
-                              //   fit: BoxFit.cover,
-                              // ),
                               Image.asset(
-                                    'assets/images/cake.jpg',
-                                    height: 80,
-                                    width: 80,
-                                    fit: BoxFit.cover,
-                                  ),
+                                'assets/images/cake.jpg',
+                                height: 80,
+                                width: 80,
+                                fit: BoxFit.cover,
+                              ),
                               SizedBox(width: 16),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
-                                          items[index].name,
+                                          getFilteredItems()[index].name,
                                           style: TextStyle(
-                                            fontSize: fontsize * 0.04,
-                                            fontWeight: FontWeight.w800,
-                                          ),
+                                              fontSize: fontsize * 0.04,
+                                              fontWeight: FontWeight.w800,
+                                              fontFamily: GoogleFonts.poppins()
+                                                  .fontFamily),
                                         ),
                                       ],
                                     ),
                                     Text(
-                                      'AED ${items[index].price}',
+                                      'AED ${getFilteredItems()[index].price}',
                                       style: TextStyle(
                                         fontSize: fontsize * 0.04,
-                                        fontFamily: GoogleFonts.poppins().fontFamily,
+                                        fontFamily:
+                                            GoogleFonts.poppins().fontFamily,
                                         color: appbarcolor,
                                       ),
                                     ),
                                     Text(
-                                      items[index].description,
+                                      getFilteredItems()[index].description,
                                       style: TextStyle(
                                         fontSize: fontsize * 0.03,
-                                        fontFamily: GoogleFonts.poppins().fontFamily,
+                                        fontFamily:
+                                            GoogleFonts.poppins().fontFamily,
                                         color: Colors.grey,
                                       ),
                                     ),
@@ -289,24 +326,21 @@ class _ItemListPageState extends State<ItemListPage> {
                                 children: [
                                   ElevatedButton(
                                     onPressed: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(builder: (context) => Order()),
-                                      );
+                                      _showBottomSheet(
+                                          getFilteredItems()[index]);
                                     },
                                     child: Text(
-                                      '+ Add',
+                                      'Add',
                                       style: TextStyle(
                                         fontSize: fontsize * 0.04,
-                                        fontFamily: GoogleFonts.poppins().fontFamily,
+                                        fontFamily:
+                                            GoogleFonts.poppins().fontFamily,
                                         color: Colors.white,
                                       ),
                                     ),
                                     style: ElevatedButton.styleFrom(
-                                      minimumSize: Size(30, 30),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(5.0),
-                                      ),
-                                      backgroundColor: container1, // Dark red color
+                                      backgroundColor: appbarcolor,
+                                      shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
                                     ),
                                   ),
                                 ],
@@ -333,29 +367,166 @@ class CategoryButton extends StatelessWidget {
   final VoidCallback onTap;
 
   const CategoryButton({
-    Key? key,
     required this.text,
     required this.isSelected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: ElevatedButton(
-        onPressed: onTap,
-        child: Text(
-          text,
-          style: TextStyle(fontFamily: GoogleFonts.poppins().fontFamily),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 8),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? appbarcolor : Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: appbarcolor),
         ),
-        style: ElevatedButton.styleFrom(
-          foregroundColor: isSelected ? Colors.white : Colors.black,
-          backgroundColor: isSelected ? container1 : Colors.grey[300],
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+        child: Center(
+          child: Text(
+            text,
+            style: TextStyle(
+                color: isSelected ? Colors.white : appbarcolor,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                fontFamily: GoogleFonts.poppins().fontFamily),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class BottomSheetContent extends StatefulWidget {
+  final double fontsize;
+  final Datumm selectedDatum;
+
+  BottomSheetContent({required this.fontsize, required this.selectedDatum});
+
+  @override
+  _BottomSheetContentState createState() => _BottomSheetContentState();
+}
+
+class _BottomSheetContentState extends State<BottomSheetContent> {
+  int quantity = 1;
+  late TextEditingController _priceController;
+
+  @override
+  void initState() {
+    super.initState();
+    _priceController =
+        TextEditingController(text: widget.selectedDatum.price.toString());
+  }
+
+  void _incrementQuantity() {
+    setState(() {
+      quantity++;
+    });
+  }
+
+  void _decrementQuantity() {
+    if (quantity > 1) {
+      setState(() {
+        quantity--;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _priceController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      height: 400,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.selectedDatum.name,
+            style: TextStyle(
+              fontSize: widget.fontsize * 0.06,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8),
+          TextField(
+            controller: _priceController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: 'Price (AED)',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            widget.selectedDatum.description,
+            style: TextStyle(
+              fontSize: widget.fontsize * 0.04,
+            ),
+          ),
+          SizedBox(height: 16),
+          Row(
+            children: [
+              Text(
+                'Quantity:',
+                style: TextStyle(
+                  fontSize: widget.fontsize * 0.05,
+                ),
+              ),
+              SizedBox(width: 16),
+              IconButton(
+                onPressed: _decrementQuantity,
+                icon: Icon(Icons.remove),
+              ),
+              Text(
+                '$quantity',
+                style: TextStyle(
+                  fontSize: widget.fontsize * 0.05,
+                ),
+              ),
+              IconButton(
+                onPressed: _incrementQuantity,
+                icon: Icon(Icons.add),
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+          Center(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => Cart(
+                    initialItems: [
+                      Item(
+                        title: widget.selectedDatum.name,
+                        price: double.parse(
+                            _priceController.text), // Use the entered price
+                        quantity: quantity,
+                      )
+                    ],
+                  ),
+                ));
+              },
+              child: Text(
+                'Go to Cart',
+                style: TextStyle(
+                  fontSize: widget.fontsize * 0.05,
+                  color: Colors.white,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: appbarcolor,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

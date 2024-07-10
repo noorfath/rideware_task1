@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rideware_task1/const.dart';
-import 'package:rideware_task1/view/pages/almadina.dart';
 import 'package:rideware_task1/view/pages/orderdetail.dart';
 import 'package:rideware_task1/view/pages/salesdetailcmplt.dart';
 
