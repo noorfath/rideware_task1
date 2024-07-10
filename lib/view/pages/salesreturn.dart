@@ -345,28 +345,9 @@ class SalesReturn extends StatelessWidget {
                           });
                         },
                       ),
-<<<<<<< HEAD
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Refund",
-                      style: TextStyle(
-                        fontSize: fontsize * 0.04,
-                        fontFamily: GoogleFonts.poppins().fontFamily,
-                      ),
-                    ),
-                    Transform.scale(
-                      scale: 0.6,
-                      child: Switch(
-=======
                       Text('Replacement'),
                       SizedBox(width: 32),
                       Checkbox(
->>>>>>> 109c91722b2639c3609bf887f290baafe47cd005
                         value: isRefund,
                         onChanged: (value) {
                           setState(() {
