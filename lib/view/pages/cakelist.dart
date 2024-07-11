@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -412,12 +413,14 @@ class BottomSheetContent extends StatefulWidget {
 class _BottomSheetContentState extends State<BottomSheetContent> {
   int quantity = 1;
   late TextEditingController _priceController;
+  late TextEditingController _unitController;
+  bool isFree = false;
 
   @override
   void initState() {
     super.initState();
-    _priceController =
-        TextEditingController(text: widget.selectedDatum.price.toString());
+    _priceController = TextEditingController(text: widget.selectedDatum.price.toString());
+    _unitController = TextEditingController(text: "EACH"); // Default value
   }
 
   void _incrementQuantity() {
@@ -437,6 +440,7 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
   @override
   void dispose() {
     _priceController.dispose();
+    _unitController.dispose();
     super.dispose();
   }
 
@@ -451,49 +455,124 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
           Text(
             widget.selectedDatum.name,
             style: TextStyle(
-              fontSize: widget.fontsize * 0.06,
+              fontSize: widget.fontsize * 0.05,
+              fontFamily: GoogleFonts.poppins().fontFamily,
               fontWeight: FontWeight.bold,
             ),
           ),
           SizedBox(height: 8),
-          TextField(
-            controller: _priceController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: 'Price (AED)',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            widget.selectedDatum.description,
-            style: TextStyle(
-              fontSize: widget.fontsize * 0.04,
-            ),
-          ),
-          SizedBox(height: 16),
           Row(
             children: [
               Text(
-                'Quantity:',
+                'Price',
                 style: TextStyle(
-                  fontSize: widget.fontsize * 0.05,
+                  fontSize: widget.fontsize * 0.04,
+                  fontFamily: GoogleFonts.poppins().fontFamily,
                 ),
               ),
               SizedBox(width: 16),
-              IconButton(
-                onPressed: _decrementQuantity,
-                icon: Icon(Icons.remove),
-              ),
-              Text(
-                '$quantity',
-                style: TextStyle(
-                  fontSize: widget.fontsize * 0.05,
+              Expanded(
+                child: TextField(
+                  controller: _priceController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
                 ),
               ),
-              IconButton(
-                onPressed: _incrementQuantity,
-                icon: Icon(Icons.add),
+            ],
+          ),
+          SizedBox(height: 8),
+          Row(
+            children: [
+              Text(
+                'Unit',
+                style: TextStyle(
+                  fontSize: widget.fontsize * 0.04,
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                ),
+              ),
+              SizedBox(width: 24),
+              Expanded(
+                child: TextField(
+                  style: TextStyle(
+                    fontSize: widget.fontsize * 0.03,
+                    fontFamily: GoogleFonts.poppins().fontFamily,
+                  ),
+                  controller: _unitController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Row(
+            children: [
+              Checkbox(
+                value: isFree,
+                onChanged: (bool? value) {
+                  setState(() {
+                    isFree = value ?? false;
+                  });
+                },
+              ),
+              Text(
+                'Free',
+                style: TextStyle(
+                  fontSize: widget.fontsize * 0.04,
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Quantity',
+            style: TextStyle(
+              fontSize: widget.fontsize * 0.04,
+              fontFamily: GoogleFonts.poppins().fontFamily,
+            ),
+          ),
+          Row(
+            children: [
+              GestureDetector(
+                onTap: _decrementQuantity,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: EdgeInsets.all(8),
+                  child: Icon(Icons.remove, color: Colors.white),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 16),
+                padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '$quantity',
+                  style: TextStyle(
+                    fontSize: widget.fontsize * 0.04,
+                    fontFamily: GoogleFonts.poppins().fontFamily,
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: _incrementQuantity,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: EdgeInsets.all(8),
+                  child: Icon(Icons.add, color: Colors.white),
+                ),
               ),
             ],
           ),
@@ -501,28 +580,20 @@ class _BottomSheetContentState extends State<BottomSheetContent> {
           Center(
             child: ElevatedButton(
               onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => Cart(
-                    initialItems: [
-                      Item(
-                        title: widget.selectedDatum.name,
-                        price: double.parse(
-                            _priceController.text), // Use the entered price
-                        quantity: quantity,
-                      )
-                    ],
-                  ),
-                ));
+                // Add logic to handle adding to cart
+                Navigator.pop(context);
               },
               child: Text(
-                'Go to Cart',
+                'Add to Cart',
                 style: TextStyle(
-                  fontSize: widget.fontsize * 0.05,
+                  fontSize: widget.fontsize * 0.04,
+                  fontFamily: GoogleFonts.poppins().fontFamily,
                   color: Colors.white,
                 ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: appbarcolor,
+                 shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
               ),
             ),
           ),
