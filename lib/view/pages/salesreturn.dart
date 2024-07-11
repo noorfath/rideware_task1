@@ -165,7 +165,8 @@ class SalesReturn extends StatelessWidget {
 
   Widget buildCustomerListView(BuildContext context, double fontsize) {
     return ListView.builder(
-      physics: NeverScrollableScrollPhysics(), // To prevent scrolling inside SingleChildScrollView
+      physics:
+          NeverScrollableScrollPhysics(), // To prevent scrolling inside SingleChildScrollView
       shrinkWrap: true, // To allow ListView to take minimum space needed
       itemCount: 4,
       itemBuilder: (context, index) {
@@ -250,165 +251,199 @@ class SalesReturn extends StatelessWidget {
     );
   }
 
- void _showBottomSheet(BuildContext context) {
-  TextEditingController reasonController = TextEditingController();
-  TextEditingController remarksController = TextEditingController();
-  int quantity = 1;
-  var height = MediaQuery.of(context).size.height;
-  var width = MediaQuery.of(context).size.width;
-  var fontsize = MediaQuery.of(context).size.width;
+  void _showBottomSheet(BuildContext context) {
+    TextEditingController reasonController = TextEditingController();
+    TextEditingController remarksController = TextEditingController();
+    int quantity = 1;
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
+    var fontsize = MediaQuery.of(context).size.width;
+    
 
-  bool isReplacement = false;
-  bool isRefund = false;
+    bool isReplacement = false;
+    bool isRefund = false;
 
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
-    ),
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              left: 16,
-              right: 16,
-              top: 16,
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(
-                    'Vanilla Cake',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                left: 16,
+                right: 16,
+                top: 16,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      'Vanilla Cake',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          'Reason',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 5,
-                        child: TextField(
-                          controller: reasonController,
-                          decoration: InputDecoration(contentPadding: EdgeInsets.all(8.0),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          'Remarks',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 5,
-                        child: TextField(
-                          controller: remarksController,
-                          decoration: InputDecoration(contentPadding: EdgeInsets.all(8.0),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Checkbox(
-                        value: isReplacement,
-                        onChanged: (value) {
-                          setState(() {
-                            isReplacement = value!;
-                          });
-                        },
-                      ),
-                      Text('Replacement'),
-                      SizedBox(width: 32),
-                      Checkbox(
-                        value: isRefund,
-                        onChanged: (value) {
-                          setState(() {
-                            isRefund = value!;
-                          });
-                        },
-                      ),
-                      Text('Refund'),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Quantity',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.remove),
-                            onPressed: () {
-                              setState(() {
-                                if (quantity > 1) {
-                                  quantity--;
-                                }
-                              });
-                            },
-                          ),
-                          Text(
-                            quantity.toString(),
+                    SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            'Reason',
                             style: TextStyle(fontSize: 18),
                           ),
-                          IconButton(
-                            icon: Icon(Icons.add),
-                            onPressed: () {
-                              setState(() {
-                                quantity++;
-                              });
-                            },
+                        ),
+                        Expanded(
+                          flex: 5,
+                          child: TextField(
+                            controller: reasonController,
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(8.0),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5.0),
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Handle form submission logic here
-                      Navigator.pop(context);
-                    },
-                    child: Text('Submit'),
-                  ),
-                ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            'Remarks',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 5,
+                          child: TextField(
+                            controller: remarksController,
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(8.0),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(5.0),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      children: [
+                        
+                        Text('Replacement'),
+                        Checkbox(
+                          value: isReplacement,
+                          onChanged: (value) {
+                            setState(() {
+                              isReplacement = value!;
+                            });
+                          },
+                        ),
+                        SizedBox(width: 32),
+                      
+                        Text('Refund'),
+                         Checkbox(
+                          value: isRefund,
+                          onChanged: (value) {
+                            setState(() {
+                              isRefund = value!;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Quantity',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.remove),
+                              onPressed: () {
+                                setState(() {
+                                  if (quantity > 1) {
+                                    quantity--;
+                                  }
+                                });
+                              },
+                            ),
+                            Text(
+                              quantity.toString(),
+                              style: TextStyle(fontSize: 18),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.add),
+                              onPressed: () {
+                                setState(() {
+                                  quantity++;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    Row(mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            // Handle form submission logic here
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5.0)),
+                              backgroundColor:Colors.white),
+                          child: Text(
+                            'cancel',
+                            style: TextStyle(
+                                fontFamily: GoogleFonts.poppins().fontFamily,fontSize: fontsize*0.03,
+                                color: text1),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 10.0,
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Handle form submission logic here
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5.0)),
+                              backgroundColor:appbarcolor),
+                          child: Text('Save',style: TextStyle(
+                                fontFamily: GoogleFonts.poppins().fontFamily,fontSize: fontsize*0.03,
+                                color: text1),),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      );
-    },
-  );
-}
+            );
+          },
+        );
+      },
+    );
+  }
 }
