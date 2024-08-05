@@ -1,21 +1,25 @@
 import 'dart:convert';
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:rideware_task1/const.dart';
+import 'package:rideware_task1/controller/cartprovider.dart';
 import 'package:rideware_task1/model/cakelistmodel.dart';
 import 'package:rideware_task1/model/categorymodel.dart';
 import 'package:rideware_task1/view/pages/cart.dart';
 
 void main() {
-  runApp(MaterialApp(
-    home: ItemListPage(),
-    debugShowCheckedModeBanner: false,
-  ));
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => CartProvider(),
+      child: MaterialApp(
+        home: ItemListPage(),
+        debugShowCheckedModeBanner: false,
+      ),
+    ),
+  );
 }
 
 class ItemListPage extends StatefulWidget {
@@ -25,10 +29,8 @@ class ItemListPage extends StatefulWidget {
 
 class _ItemListPageState extends State<ItemListPage> {
   List<Datumm> items = [];
-
   List<String> categories = ['ALL'];
   String selectedCategory = 'ALL';
-  int quantity = 1;
 
   @override
   void initState() {
@@ -44,21 +46,18 @@ class _ItemListPageState extends State<ItemListPage> {
     try {
       final response = await http.post(
         Uri.parse(url),
-        body: jsonEncode(requestBody), // Encode request body
+        body: jsonEncode(requestBody),
         headers: {'Content-Type': 'application/json', 'Accept': '/'},
       );
 
       if (response.statusCode == 200) {
-        print('API call successful');
-        final Categorymodel categoryModel =
-            categorymodelFromJson(response.body);
+        final Categorymodel categoryModel = categorymodelFromJson(response.body);
         setState(() {
           categories.addAll(
               categoryModel.data.map((category) => category.name).toList());
         });
       } else {
-        print(
-            'Failed to load categories (status code: ${response.statusCode})');
+        print('Failed to load categories (status code: ${response.statusCode})');
       }
     } catch (e) {
       print('Error: $e');
@@ -72,14 +71,12 @@ class _ItemListPageState extends State<ItemListPage> {
     try {
       final response = await http.post(
         Uri.parse(url),
-        body: jsonEncode(requestBody), // Encode request body
+        body: jsonEncode(requestBody),
         headers: {'Content-Type': 'application/json', 'Accept': '/'},
       );
 
       if (response.statusCode == 200) {
-        print('API call successful');
-        final Cakelistmodel cakelistModel =
-            cakelistmodelFromJson(response.body);
+        final Cakelistmodel cakelistModel = cakelistmodelFromJson(response.body);
         setState(() {
           items = cakelistModel.data;
         });
@@ -102,29 +99,28 @@ class _ItemListPageState extends State<ItemListPage> {
     }
   }
 
-  void _showBottomSheet(Datumm selectedDatum) {
-    var fontsize = MediaQuery.of(context).size.width;
-
+  void _showBottomSheet(Datumm selectedDatum, double fontsize) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
         return BottomSheetContent(
-            fontsize: fontsize, selectedDatum: selectedDatum);
+          selectedDatum: selectedDatum, fontsize: fontsize,
+        );
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    var cartProvider = Provider.of<CartProvider>(context);
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
-    var fontsize = MediaQuery.of(context).size.width;
+    var fontsize = width;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness:
-            Brightness.dark, // Use Brightness.light for white icons
+        statusBarIconBrightness: Brightness.dark,
       ),
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -145,9 +141,7 @@ class _ItemListPageState extends State<ItemListPage> {
               IconButton(
                 onPressed: () {
                   Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => Cart(
-                      initialItems: [],
-                    ),
+                    builder: (context) => Cart(initialItems: [],),
                   ));
                 },
                 icon: Icon(Icons.shopping_cart_rounded),
@@ -211,26 +205,6 @@ class _ItemListPageState extends State<ItemListPage> {
                                 ),
                               ),
                             ),
-                            SizedBox(width: 2),
-                            // ElevatedButton(
-                            //   onPressed: () {},
-                            //   child: Text(
-                            //     '+ Add',
-                            //     style: TextStyle(
-                            //       fontFamily: GoogleFonts.poppins().fontFamily,
-                            //       fontSize: fontsize * 0.04,
-                            //       color: appbarcolor,
-                            //     ),
-                            //   ),
-                            //   style: ElevatedButton.styleFrom(
-                            //     fixedSize: Size(100, 45),
-                            //     backgroundColor:
-                            //         Colors.white, // Replace with your color
-                            //     shape: RoundedRectangleBorder(
-                            //       borderRadius: BorderRadius.circular(10),
-                            //     ),
-                            //   ),
-                            // ),
                           ],
                         ),
                       ),
@@ -238,7 +212,6 @@ class _ItemListPageState extends State<ItemListPage> {
                   ),
                 ),
                 SizedBox(height: 16),
-                // Category Buttons
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -327,8 +300,7 @@ class _ItemListPageState extends State<ItemListPage> {
                                 children: [
                                   ElevatedButton(
                                     onPressed: () {
-                                      _showBottomSheet(
-                                          getFilteredItems()[index]);
+                                      _showBottomSheet(getFilteredItems()[index], fontsize);
                                     },
                                     child: Text(
                                       'Add',
@@ -341,7 +313,9 @@ class _ItemListPageState extends State<ItemListPage> {
                                     ),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: appbarcolor,
-                                      shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -375,24 +349,23 @@ class CategoryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var fontsize = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 8),
+        margin: EdgeInsets.only(right: 8),
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? appbarcolor : Colors.white,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: appbarcolor),
         ),
-        child: Center(
-          child: Text(
-            text,
-            style: TextStyle(
-                color: isSelected ? Colors.white : appbarcolor,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                fontFamily: GoogleFonts.poppins().fontFamily),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: fontsize * 0.035,
+            fontFamily: GoogleFonts.poppins().fontFamily,
+            color: isSelected ? Colors.white : appbarcolor,
           ),
         ),
       ),
@@ -401,201 +374,93 @@ class CategoryButton extends StatelessWidget {
 }
 
 class BottomSheetContent extends StatefulWidget {
-  final double fontsize;
   final Datumm selectedDatum;
+  final double fontsize;
 
-  BottomSheetContent({required this.fontsize, required this.selectedDatum});
+  BottomSheetContent({required this.selectedDatum, required this.fontsize});
 
   @override
   _BottomSheetContentState createState() => _BottomSheetContentState();
 }
 
 class _BottomSheetContentState extends State<BottomSheetContent> {
-  int quantity = 1;
-  late TextEditingController _priceController;
-  late TextEditingController _unitController;
-  bool isFree = false;
+  TextEditingController _quantityController = TextEditingController(text: '1');
+  TextEditingController _priceController = TextEditingController();
+  late int quantity;
 
   @override
   void initState() {
     super.initState();
-    _priceController = TextEditingController(text: widget.selectedDatum.price.toString());
-    _unitController = TextEditingController(text: "EACH"); // Default value
-  }
-
-  void _incrementQuantity() {
-    setState(() {
-      quantity++;
-    });
-  }
-
-  void _decrementQuantity() {
-    if (quantity > 1) {
-      setState(() {
-        quantity--;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _priceController.dispose();
-    _unitController.dispose();
-    super.dispose();
+    _priceController.text = widget.selectedDatum.price.toString();
+    quantity = 1;
   }
 
   @override
   Widget build(BuildContext context) {
+    var cartProvider = Provider.of<CartProvider>(context);
     return Container(
       padding: EdgeInsets.all(16),
-      height: 400,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             widget.selectedDatum.name,
             style: TextStyle(
               fontSize: widget.fontsize * 0.05,
-              fontFamily: GoogleFonts.poppins().fontFamily,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 10),
+          Text('Price: AED ${widget.selectedDatum.price.toStringAsFixed(2)}'),
+          SizedBox(height: 10),
           Row(
             children: [
-              Text(
-                'Price',
-                style: TextStyle(
-                  fontSize: widget.fontsize * 0.04,
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                ),
-              ),
-              SizedBox(width: 16),
               Expanded(
                 child: TextField(
-                  controller: _priceController,
+                  controller: _quantityController,
+                  decoration: InputDecoration(
+                    labelText: 'Quantity',
+                    border: OutlineInputBorder(),
+                  ),
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      quantity = int.tryParse(value) ?? 1;
+                    });
+                  },
                 ),
               ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Row(
-            children: [
-              Text(
-                'Unit',
-                style: TextStyle(
-                  fontSize: widget.fontsize * 0.04,
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                ),
-              ),
-              SizedBox(width: 24),
-              Expanded(
-                child: TextField(
-                  style: TextStyle(
-                    fontSize: widget.fontsize * 0.03,
-                    fontFamily: GoogleFonts.poppins().fontFamily,
-                  ),
-                  controller: _unitController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Row(
-            children: [
-              Checkbox(
-                value: isFree,
-                onChanged: (bool? value) {
-                  setState(() {
-                    isFree = value ?? false;
-                  });
+              SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () {
+                  Item item = Item(
+                    itemId: widget.selectedDatum.itemId,
+                    itemname: widget.selectedDatum.name,
+                    categoryId: widget.selectedDatum.categoryId,
+                    price: double.parse(_priceController.text),
+                    quantity: quantity,
+                    total: double.parse(_priceController.text) * quantity,
+                  );
+                  cartProvider.addItem(item, quantity);
+                  Navigator.pop(context);
                 },
-              ),
-              Text(
-                'Free',
-                style: TextStyle(
-                  fontSize: widget.fontsize * 0.04,
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Quantity',
-            style: TextStyle(
-              fontSize: widget.fontsize * 0.04,
-              fontFamily: GoogleFonts.poppins().fontFamily,
-            ),
-          ),
-          Row(
-            children: [
-              GestureDetector(
-                onTap: _decrementQuantity,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: EdgeInsets.all(8),
-                  child: Icon(Icons.remove, color: Colors.white),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 16),
-                padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8),
-                ),
                 child: Text(
-                  '$quantity',
+                  'Add to Cart',
                   style: TextStyle(
                     fontSize: widget.fontsize * 0.04,
                     fontFamily: GoogleFonts.poppins().fontFamily,
+                    color: Colors.white,
                   ),
                 ),
-              ),
-              GestureDetector(
-                onTap: _incrementQuantity,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(8),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: appbarcolor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  padding: EdgeInsets.all(8),
-                  child: Icon(Icons.add, color: Colors.white),
                 ),
               ),
             ],
-          ),
-          SizedBox(height: 16),
-          Center(
-            child: ElevatedButton(
-              onPressed: () {
-                // Add logic to handle adding to cart
-                Navigator.pop(context);
-              },
-              child: Text(
-                'Add to Cart',
-                style: TextStyle(
-                  fontSize: widget.fontsize * 0.04,
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                  color: Colors.white,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: appbarcolor,
-                 shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
-              ),
-            ),
           ),
         ],
       ),

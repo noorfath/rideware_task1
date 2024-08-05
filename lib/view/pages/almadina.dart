@@ -9,19 +9,32 @@ import 'package:rideware_task1/view/pages/paymenthistory.dart';
 import 'package:rideware_task1/view/pages/payments.dart';
 import 'package:rideware_task1/view/pages/return.dart';
 import 'package:rideware_task1/view/pages/sales.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../const.dart';
 
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-  runApp(MaterialApp(
-    home: Almadina(),
-    debugShowCheckedModeBanner: false,
-  ));
+// void main() {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+//   runApp(MaterialApp(
+//     home: Almadina(),
+//     debugShowCheckedModeBanner: false,
+//   ));
+// }
+ Future<int?> getUserId() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getInt('userId');
+}
+
+Future<int?> getCustomerId() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getInt('customerId');
 }
 
 class Almadina extends StatelessWidget {
-  const Almadina({super.key});
+  final int userId;
+  final int custId;
+  
+  const Almadina({super.key, required customer, required this.userId, required this.custId});
 
   @override
   Widget build(BuildContext context) {
@@ -38,12 +51,12 @@ class Almadina extends StatelessWidget {
       {
         'image': 'assets/icons/history (1).png',
         'text': 'Sales History',
-        'route': SalesHistory()
+        'route': SalesHistory(userId: userId, customerId: custId)
       },
       {
         'image': 'assets/icons/return.png',
         'text': 'Return',
-        'route': ReturnSalesPage()
+        'route': ReturnSalesPage(userId: userId, customerId: custId)
       },
       {
         'image': 'assets/icons/history (1).png',

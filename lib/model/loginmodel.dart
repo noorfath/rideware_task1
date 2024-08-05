@@ -44,7 +44,7 @@ class Data {
     required this.country,
     required this.region,
     required this.ipAddress,
-    required this.location,
+    required this.location, required List<dynamic> detail,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) {
@@ -56,7 +56,7 @@ class Data {
       country: json['country'],
       region: json['region'],
       ipAddress: json['ipAddress'],
-      location: json['location'],
+      location: json['location'], detail: [], 
     );
   }
 

@@ -1,3 +1,6 @@
+// customermodel.dart
+import 'dart:convert';
+
 class Customermodel {
   bool isValid;
   String message;
@@ -9,7 +12,6 @@ class Customermodel {
     required this.data,
   });
 
-  // Factory method to create an instance from JSON
   factory Customermodel.fromJson(Map<String, dynamic> json) {
     var list = json['data'] as List;
     List<Datum> dataList = list.map((i) => Datum.fromJson(i)).toList();
@@ -32,12 +34,50 @@ class Datum {
     required this.routeId,
   });
 
-  // Factory method to create an instance from JSON
   factory Datum.fromJson(Map<String, dynamic> json) {
     return Datum(
       custId: json['custId'],
       name: json['name'],
       routeId: json['routeId'],
+    );
+  }
+}
+
+class ApiResponse {
+  bool isValid;
+  String message;
+  List<Routes> data;
+
+  ApiResponse({
+    required this.isValid,
+    required this.message,
+    required this.data,
+  });
+
+  factory ApiResponse.fromJson(Map<String, dynamic> json) {
+    var list = json['data'] as List;
+    List<Routes> dataList = list.map((i) => Routes.fromJson(i)).toList();
+    return ApiResponse(
+      isValid: json['isValid'],
+      message: json['message'],
+      data: dataList,
+    );
+  }
+}
+
+class Routes {
+  int routeId;
+  String name;
+
+  Routes({
+    required this.routeId,
+    required this.name,
+  });
+
+  factory Routes.fromJson(Map<String, dynamic> json) {
+    return Routes(
+      routeId: json['routeId'],
+      name: json['name'],
     );
   }
 }

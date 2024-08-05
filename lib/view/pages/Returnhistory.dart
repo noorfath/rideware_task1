@@ -306,9 +306,9 @@ class _ReturnHistoryState extends State<ReturnHistory> {
                   ],
                 ),
                 onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => Almadina()),
-                  );
+                  // Navigator.of(context).push(
+                  //   MaterialPageRoute(builder: (context) => Almadina(username: '', routeId: '', cityName: '',)),
+                  // );
                 },
               ),
               Padding(

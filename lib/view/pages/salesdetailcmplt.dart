@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:rideware_task1/const.dart';
 
 class salescmplt extends StatelessWidget {
-  const salescmplt({super.key});
+  const salescmplt({super.key, required soId});
 
   @override
   Widget build(BuildContext context) {
@@ -23,12 +23,12 @@ class salescmplt extends StatelessWidget {
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(45.0),
           child: AppBar(
-            title: Text(
-              "Order No",
-              style: TextStyle(
-                  fontFamily: GoogleFonts.poppins().fontFamily,
-                  color: Colors.white),
-            ),
+            // title: Text(
+            //   "Order No",
+            //   style: TextStyle(
+            //       fontFamily: GoogleFonts.poppins().fontFamily,
+            //       color: Colors.white),
+            // ),
             elevation: 0,
             leading: IconButton(
               icon: Icon(

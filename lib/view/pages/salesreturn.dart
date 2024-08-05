@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:rideware_task1/const.dart';
 
 void main() {
@@ -8,12 +10,47 @@ void main() {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
-    home: SalesReturn(),
+    home: SalesReturn(soId: 123), // Replace with your actual soId
   ));
 }
 
-class SalesReturn extends StatelessWidget {
-  const SalesReturn({super.key});
+class SalesReturn extends StatefulWidget {
+  final int soId;
+
+  const SalesReturn({Key? key, required this.soId}) : super(key: key);
+
+  @override
+  _SalesReturnState createState() => _SalesReturnState();
+}
+
+class _SalesReturnState extends State<SalesReturn> {
+  late Future<Customermodel?> salesData;
+
+  @override
+  void initState() {
+    super.initState();
+    salesData = fetchSalesData(widget.soId);
+  }
+
+  Future<Customermodel?> fetchSalesData(int soId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('https://testapi.wideviewers.com/Sales/GetSOById'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'id': soId}),
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        if (jsonData != null && jsonData['data'] != null) {
+          return Customermodel.fromJson(jsonData['data']);
+        }
+      }
+    } catch (e) {
+      print('Failed to load sales data: $e');
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +61,7 @@ class SalesReturn extends StatelessWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness:
-            Brightness.dark, // Use Brightness.light for white icons
+        statusBarIconBrightness: Brightness.dark,
       ),
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -33,13 +69,13 @@ class SalesReturn extends StatelessWidget {
           preferredSize: Size.fromHeight(45.0),
           child: AppBar(
             title: Text(
-              " Sales Return",
+              "Sales Return",
               style: TextStyle(
                 fontFamily: GoogleFonts.poppins().fontFamily,
                 color: Colors.white,
               ),
             ),
-            backgroundColor: appbarcolor,
+            backgroundColor: container1,
             leading: IconButton(
               icon: Icon(
                 Icons.arrow_back_ios_new_rounded,
@@ -61,115 +97,125 @@ class SalesReturn extends StatelessWidget {
             ],
           ),
         ),
-        body: Stack(
-          children: [
-            SingleChildScrollView(
-              child: Container(
-                width: width,
-                padding: EdgeInsets.only(
-                    bottom: 130), // Add padding to prevent overlap
-                child: Column(
-                  children: [
-                    Container(
-                      height: height * 0.20,
+        body: FutureBuilder<Customermodel?>(
+          future: salesData,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (snapshot.hasData && snapshot.data != null) {
+              final data = snapshot.data!;
+              return Stack(
+                children: [
+                  SingleChildScrollView(
+                    child: Container(
                       width: width,
-                      decoration: BoxDecoration(
-                        color: container1,
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(20),
-                          bottomRight: Radius.circular(20),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 18.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 28.0),
-                                  child: CircleAvatar(
-                                    radius: 20,
-                                    backgroundImage: AssetImage(
-                                        'assets/images/profile man.png'),
-                                  ),
-                                ),
-                                SizedBox(width: 5),
-                                Text(
-                                  'Customer name',
-                                  style: GoogleFonts.poppins(
-                                    textStyle: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: fontsize * 0.05,
-                                      fontFamily:
-                                          GoogleFonts.poppins().fontFamily,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                      padding: EdgeInsets.only(bottom: 130),
+                      child: Column(
+                        children: [
+                          Container(
+                            height: height * 0.20,
+                            width: width,
+                            decoration: BoxDecoration(
+                              color: container1,
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(20),
+                                bottomRight: Radius.circular(20),
+                              ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 18.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 28.0),
+                                        child: CircleAvatar(
+                                          radius: 20,
+                                          backgroundImage: AssetImage('assets/images/profile man.png'),
+                                        ),
+                                      ),
+                                      SizedBox(width: 5),
+                                      Text(
+                                        data.customerName,
+                                        style: GoogleFonts.poppins(
+                                          textStyle: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: fontsize * 0.05,
+                                            fontFamily: GoogleFonts.poppins().fontFamily,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.only(left: 16.0),
-                                child: Text(
-                                  'Order Number',
-                                  style: TextStyle(
-                                    fontSize: fontsize * 0.04,
-                                    fontFamily:
-                                        GoogleFonts.poppins().fontFamily,
-                                  ),
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 16.0),
+                                      child: Text(
+                                        'Order Number: ${data.soId}',
+                                        style: TextStyle(
+                                          fontSize: fontsize * 0.04,
+                                          fontFamily: GoogleFonts.poppins().fontFamily,
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 12.0),
+                                      child: Text(
+                                        'Amt: ${data.totalafterVat}',
+                                        style: TextStyle(
+                                          fontSize: fontsize * 0.04,
+                                          fontFamily: GoogleFonts.poppins().fontFamily,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.only(right: 12.0),
-                                child: Text(
-                                  'Amt',
-                                  style: TextStyle(
-                                    fontSize: fontsize * 0.04,
-                                    fontFamily:
-                                        GoogleFonts.poppins().fontFamily,
-                                  ),
-                                ),
+                              SizedBox(height: 10),
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                child: buildCustomerListView(context, fontsize, data),
                               ),
                             ],
                           ),
-                        ),
-                        SizedBox(height: 10),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 16.0),
-                          child: buildCustomerListView(context, fontsize),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+                  ),
+                ],
+              );
+            } else {
+              return Center(child: Text('No data available'));
+            }
+          },
         ),
       ),
     );
   }
 
-  Widget buildCustomerListView(BuildContext context, double fontsize) {
+  Widget buildCustomerListView(BuildContext context, double fontsize, Customermodel data) {
+    final items = data.detail;
     return ListView.builder(
-      physics:
-          NeverScrollableScrollPhysics(), // To prevent scrolling inside SingleChildScrollView
-      shrinkWrap: true, // To allow ListView to take minimum space needed
-      itemCount: 4,
+      physics: NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: items.length,
       itemBuilder: (context, index) {
+        final item = items[index];
         return Card(
           color: Colors.white,
           shape: RoundedRectangleBorder(
@@ -186,7 +232,7 @@ class SalesReturn extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Item: Strawberry',
+                      'Item: ${item.itemName}',
                       style: GoogleFonts.poppins(
                         textStyle: TextStyle(
                           fontSize: fontsize * 0.035,
@@ -195,7 +241,7 @@ class SalesReturn extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Quantity: 4',
+                      'Quantity: ${item.quantity}',
                       style: GoogleFonts.poppins(
                         textStyle: TextStyle(
                           fontSize: fontsize * 0.035,
@@ -210,7 +256,7 @@ class SalesReturn extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Unit Price: \$25.00',
+                      'Unit Price: ${item.price}',
                       style: GoogleFonts.poppins(
                         textStyle: TextStyle(
                           fontSize: fontsize * 0.035,
@@ -220,7 +266,7 @@ class SalesReturn extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        _showBottomSheet(context);
+                        _showBottomSheet(context, item.itemName);
                       },
                       child: Text(
                         'Return Item',
@@ -235,7 +281,7 @@ class SalesReturn extends StatelessWidget {
                 ),
                 SizedBox(height: 5),
                 Text(
-                  'Total Price: \$100.00',
+                  'Total Price: ${item.total}',
                   style: GoogleFonts.poppins(
                     textStyle: TextStyle(
                       fontSize: fontsize * 0.035,
@@ -250,8 +296,7 @@ class SalesReturn extends StatelessWidget {
       },
     );
   }
-
-  void _showBottomSheet(BuildContext context) {
+ void _showBottomSheet(BuildContext context, String itemName) {
     TextEditingController reasonController = TextEditingController();
     TextEditingController remarksController = TextEditingController();
     int quantity = 1;
@@ -444,6 +489,54 @@ class SalesReturn extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+class Customermodel {
+  final int soId;
+  final String customerName;
+  final double totalafterVat;
+  final List<Detail> detail;
+
+  Customermodel({
+    required this.soId,
+    required this.customerName,
+    required this.totalafterVat,
+    required this.detail,
+  });
+
+  factory Customermodel.fromJson(Map<String, dynamic> json) {
+    var list = json['detail'] as List;
+    List<Detail> detailList = list.map((i) => Detail.fromJson(i)).toList();
+
+    return Customermodel(
+      soId: (json['soId'] as num).toInt(),
+      customerName: json['customerName'],
+      totalafterVat: (json['totalafterVat'] as num).toDouble(),
+      detail: detailList,
+    );
+  }
+}
+
+class Detail {
+  final String itemName;
+  final int quantity;
+  final double price;
+  final double total;
+
+  Detail({
+    required this.itemName,
+    required this.quantity,
+    required this.price,
+    required this.total,
+  });
+
+  factory Detail.fromJson(Map<String, dynamic> json) {
+    return Detail(
+      itemName: json['itemName'],
+      quantity: (json['quantity'] as num).toInt(),
+      price: (json['price'] as num).toDouble(),
+      total: (json['total'] as num).toDouble(),
     );
   }
 }

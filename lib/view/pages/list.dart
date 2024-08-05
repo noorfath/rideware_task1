@@ -4,7 +4,24 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:rideware_task1/const.dart';
+import 'package:rideware_task1/model/loginmodel.dart';
 import 'package:rideware_task1/view/pages/almadina.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+Future<int?> getUserId() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getInt('userId');
+}
+
+Future<void> saveCustomerId(int customerId) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setInt('customerId', customerId);
+}
+
+Future<int?> getCustomerId() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getInt('customerId');
+}
 
 class Customermodel {
   bool isValid;
@@ -31,27 +48,28 @@ class Customermodel {
 class Datum {
   int custId;
   String name;
-  int routeId;
+  int? routeId; // Make routeId nullable
 
   Datum({
     required this.custId,
     required this.name,
-    required this.routeId,
+    this.routeId, // Make this field optional
   });
 
   factory Datum.fromJson(Map<String, dynamic> json) {
     return Datum(
-      custId: json['custId'],
-      name: json['name'],
-      routeId: json['routeId'],
+      custId: json['custId'] ?? 0, // Provide default value if null
+      name: json['name'] ?? '', // Provide default value if null
+      routeId: json['routeId'], // Handle nullable value
     );
   }
 }
 
 class CustomerListPage extends StatefulWidget {
   final int routeId;
+  final int userId;
 
-  const CustomerListPage({super.key, required this.routeId});
+  const CustomerListPage({super.key, required this.routeId, required this.userId, required int custId});
 
   @override
   _CustomerListPageState createState() => _CustomerListPageState();
@@ -75,7 +93,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
       final response = await http.post(
         Uri.parse(url),
         body: jsonEncode(reqBody),
-        headers: {'Content-Type': 'application/json', 'Accept': '*/*'},
+        headers: {'Content-Type': 'application/json', 'Accept': '/'},
       );
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
@@ -250,15 +268,14 @@ class _CustomerListPageState extends State<CustomerListPage> {
                                 leading: Image.asset(
                                   'assets/icons/shop (1).png',
                                   width: 40,
-                                  height: 40
+                                  height: 40,
                                 ),
                                 title: Text(
                                   customer.name,
                                   style: GoogleFonts.poppins(
                                     textStyle: TextStyle(
-                                      fontSize: fontsize * 0.04,
-                                      color: Colors.black
-                                    ),
+                                        fontSize: fontsize * 0.04,
+                                        color: Colors.black),
                                   ),
                                 ),
                                 subtitle: Text(
@@ -270,11 +287,15 @@ class _CustomerListPageState extends State<CustomerListPage> {
                                     ),
                                   ),
                                 ),
-                                onTap: () {
+                                onTap: () async {
+                                  await saveCustomerId(customer.custId);
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (context) => Almadina()
-                                    )
+                                      builder: (context) => Almadina(
+                                        customer: customer,
+                                        userId: widget.userId, custId: customer.custId,
+                                      ),
+                                    ),
                                   );
                                 },
                               ),

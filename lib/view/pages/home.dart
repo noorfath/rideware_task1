@@ -6,7 +6,15 @@ import 'package:http/http.dart' as http;
 import 'package:rideware_task1/const.dart'; // Assuming this contains your constants
 import 'package:rideware_task1/controller/modelclass.dart';
 import 'package:rideware_task1/model/routemodel2.dart';
-import 'package:rideware_task1/view/pages/list.dart'; // Adjust import as per your project
+import 'package:rideware_task1/view/pages/list.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Adjust import as per your project
+
+Future<int?> getCustomerId() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getInt('customerId');
+}
 
 class Homepage1 extends StatefulWidget {
   final String username;
@@ -19,20 +27,30 @@ class Homepage1 extends StatefulWidget {
 }
 
 class _HomePage1State extends State<Homepage1> {
+  late int custId;
   String _selectedRoute = '';
   String _selectedRegion = '';
-  String _cityName = ''; // Add a field to store the city name
+  String _cityName = '';
   List<String> _routes = [];
   List<Routes> routes = [];
+  Routes? _selectedRouteObject;
 
   @override
   void initState() {
     super.initState();
-    _fetchRoutes(); // Fetch routes and region when widget initializes
+    _initializeCustomerId();
+    _fetchRoutes();
+  }
+
+  Future<void> _initializeCustomerId() async {
+    final customerId = await getCustomerId();
+    setState(() {
+      custId = customerId ?? 0;
+    });
   }
 
   Future<void> _fetchRoutes() async {
-    final url = 'https://testapi.wideviewers.com/api/Route/GetRouteByUser';
+    final url = 'https://testapi.wideviewers.com/Route/GetRouteByUser';
     final Map<String, dynamic> reqBody = {
       "userId": widget.userId
     };
@@ -40,26 +58,25 @@ class _HomePage1State extends State<Homepage1> {
       final response = await http.post(
         Uri.parse(url),
         body: jsonEncode(reqBody),
-        headers: {'Content-Type': 'application/json','Accept': '*/*'}
+        headers: {'Content-Type': 'application/json', 'Accept': '/'}
       );
       if (response.statusCode == 200) {
-      final ApiResponse apiResponse = ApiResponse.fromJson(jsonDecode(response.body));
-      if (apiResponse.isValid) {
-        routes = apiResponse.data; // Access the list of Routes directly
-        setState(() {
-          _routes = routes.map((route) => route.name).toList(); // Extract route names
-          if (_routes.isNotEmpty) {
-            _selectedRoute = routes[0].name; // Set initial selected route
-          }
-          // Removed region/city updates as the response format doesn't include them
-        });
+        final ApiResponse apiResponse = ApiResponse.fromJson(jsonDecode(response.body));
+        if (apiResponse.isValid) {
+          routes = apiResponse.data;
+          setState(() {
+            _routes = routes.map((route) => route.name).toList();
+            if (_routes.isNotEmpty) {
+              _selectedRoute = routes[0].name;
+              _selectedRouteObject = routes[0];
+            }
+          });
+        } else {
+          print('API error: ${apiResponse.message}');
+        }
       } else {
-        print('API error: ${apiResponse.message}');
-        // Handle API error (show user message)
+        print('Failed to load routes (status code: ${response.statusCode})');
       }
-    } else {
-      print('Failed to load routes (status code: ${response.statusCode})');
-    }
     } catch (e) {
       print('Error: $e');
     }
@@ -83,7 +100,7 @@ class _HomePage1State extends State<Homepage1> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Select Route - $_selectedRegion, $_cityName', // Display selected region and city name
+                    'Select Route - $_selectedRegion, $_cityName',
                     style: TextStyle(
                       fontSize: fontsize * 0.05,
                       fontFamily: GoogleFonts.poppins().fontFamily,
@@ -117,10 +134,10 @@ class _HomePage1State extends State<Homepage1> {
           groupValue: _selectedRoute,
           onChanged: (String? value) {
             setState(() {
-              _selectedRoute = value!;
+              _selectedRoute = route.name;
+              _selectedRouteObject = route;
             });
-            Navigator.of(context).pop(); // Close the bottom sheet
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) => CustomerListPage(routeId: int.parse(value!),)));
+            Navigator.of(context).pop();
           },
           contentPadding: EdgeInsets.zero,
         ),
@@ -143,7 +160,9 @@ class _HomePage1State extends State<Homepage1> {
       {
         'image': 'assets/icons/people (2).png',
         'text': 'Customer',
-        'route': HomeDetailPage(),
+        'route': _selectedRouteObject != null 
+            ? CustomerListPage(routeId: _selectedRouteObject!.routeId, userId: widget.userId, custId: custId)
+            : null,
       },
       {
         'image': 'assets/icons/shopping-bag (2).png',
@@ -251,7 +270,7 @@ class _HomePage1State extends State<Homepage1> {
                                     ),
                                     SizedBox(width: 2),
                                     Padding(
-                                      padding: const EdgeInsets.only(bottom:8.0),
+                                      padding: const EdgeInsets.only(bottom: 8.0),
                                       child: Text(
                                         'AED',
                                         style: TextStyle(
@@ -293,7 +312,7 @@ class _HomePage1State extends State<Homepage1> {
                                     ),
                                     SizedBox(width: 2),
                                     Padding(
-                                      padding: const EdgeInsets.only(bottom:8.0),
+                                      padding: const EdgeInsets.only(bottom: 8.0),
                                       child: Text(
                                         'AED',
                                         style: TextStyle(
@@ -339,12 +358,19 @@ class _HomePage1State extends State<Homepage1> {
                   children: List.generate(items.length, (index) {
                     return GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => items[index]['route'],
-                          ),
-                        );
+                        if (items[index]['route'] != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => items[index]['route'],
+                            ),
+                          );
+                        } else {
+                          // Handle the case when the route is not available (e.g., show a message)
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Please select a route first.')),
+                          );
+                        }
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -422,7 +448,7 @@ class _HomePage1State extends State<Homepage1> {
                           container1), // Replace with your color constant
                     ),
                     onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => CustomerListPage(routeId: 1,)));
+                      // Navigator.pop(context);
                     },
                     child: Text(
                       'More',
@@ -439,6 +465,4 @@ class _HomePage1State extends State<Homepage1> {
           ),
         ),
       ),
-    );
-  }
-}
+    );}}

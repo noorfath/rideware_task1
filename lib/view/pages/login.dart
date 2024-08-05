@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/io_client.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:rideware_task1/const.dart';
 import 'package:rideware_task1/model/loginmodel.dart';
 import 'package:rideware_task1/view/pages/home.dart';
@@ -61,6 +62,11 @@ class _SignupScreenState extends State<SignupScreen> {
         final LoginApiResponse responseBody = LoginApiResponse.fromJson(jsonDecode(response.body));
         if (responseBody.isValid) {
           final int userId = responseBody.data.user.id; // Extract userId
+          
+          // Save userId in shared_preferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setInt('userId', userId);
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Login successful')),
           );
@@ -112,7 +118,7 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-  void _handleLoginResponse(http.Response response) {
+  void _handleLoginResponse(http.Response response) async {
     print('Handling Login Response');
     print('Response Status Code: ${response.statusCode}');
     print('Response Body: ${response.body}');
@@ -121,6 +127,11 @@ class _SignupScreenState extends State<SignupScreen> {
       final Map<String, dynamic> responseBody = jsonDecode(response.body);
       if (responseBody.isNotEmpty) {
         final int userId = responseBody['userId']; // Extract userId
+        
+        // Save userId in shared_preferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('userId', userId);
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Login successful')),
         );
@@ -139,6 +150,7 @@ class _SignupScreenState extends State<SignupScreen> {
     } else {
       String errorMessage = 'Login failed: ';
       if (response.body.isNotEmpty) {
+         print('Response Status Code: ${response.statusCode}');
         try {
           final responseBody = jsonDecode(response.body);
           errorMessage += responseBody['message'] ?? 'Unknown error';
@@ -290,3 +302,29 @@ class MyHttpOverrides extends HttpOverrides {
           (X509Certificate cert, String host, int port) => true;
   }
 }
+
+// Function to retrieve userId from shared_preferences
+// Future<int?> getUserId() async {
+//   final prefs = await SharedPreferences.getInstance();
+//   return prefs.getInt('userId');
+// }
+
+// class Homepage1 extends StatelessWidget {
+//   final String username;
+//   final int userId;
+
+//   const Homepage1({Key? key, required this.username, required this.userId}) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     // Your Homepage1 build method implementation
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Homepage1'),
+//       ),
+//       body: Center(
+//         child: Text('Welcome, $username! Your user ID is $userId.'),
+//       ),
+//     );
+//   }
+// }

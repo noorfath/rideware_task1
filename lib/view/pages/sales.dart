@@ -1,22 +1,118 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:rideware_task1/const.dart';
 import 'package:rideware_task1/view/pages/orderdetail.dart';
 import 'package:rideware_task1/view/pages/salesdetailcmplt.dart';
 
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: SalesHistory(),
-  ));
+// void main() {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+//   runApp(MaterialApp(
+//     debugShowCheckedModeBanner: false,
+//     home: SalesHistory(userId: 1, customerId: 1),
+//   ));
+// }
+
+class SalesHistory extends StatefulWidget {
+  final int userId;
+  final int customerId;
+
+  const SalesHistory({Key? key, required this.userId, required this.customerId}) : super(key: key);
+
+  @override
+  _SalesHistoryState createState() => _SalesHistoryState();
 }
 
-class SalesHistory extends StatelessWidget {
-  const SalesHistory({super.key});
+class _SalesHistoryState extends State<SalesHistory> {
+  DateTime? selectedDate;
+  List<Map<String, dynamic>> orders = [];
 
+  @override
+  void initState() {
+    super.initState();
+    _fetchSalesOrders();
+  }
+
+  Future<void> _fetchSalesOrders() async {
+    final url = 'http://testapi.wideviewers.com/Sales/GetAllSOUser';
+    final Map<String, dynamic> requestBody = {
+      'userId': widget.userId,
+      'customerId': widget.customerId,
+    };
+
+    try {
+      var response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      // Check for redirect
+      if (response.statusCode == 307) {
+        final newUrl = response.headers['location'];
+        if (newUrl != null) {
+          response = await http.post(
+            Uri.parse(newUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode(requestBody),
+          );
+        }
+      }
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['isValid']) {
+          final List<dynamic> data = jsonResponse['data'];
+          setState(() {
+            orders = data.map((order) => {
+              "soId": order["soId"],
+              "date": order["date"],
+              "total": order["total"],
+              "payStatus": order["payStatus"],
+              "isDelivered": order["isDelivered"]
+            }).toList();
+          });
+        } else {
+          print('Invalid response: ${jsonResponse['message']}');
+        }
+      } else {
+        print('Failed to load sales orders (status code: ${response.statusCode})');
+        print('Response body: ${response.body}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+List<Map<String, dynamic>> _filterOrders(String filter) {
+    DateTime now = DateTime.now();
+    if (filter == 'All') {
+      return orders;
+    } else if (filter == 'This Week') {
+      DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+      return orders.where((order) {
+        DateTime orderDate = DateFormat('yyyy-MM-dd').parse(order['date']);
+        return orderDate.isAfter(startOfWeek) && orderDate.isBefore(now.add(Duration(days: 1)));
+      }).toList();
+    } else if (filter == 'This Month') {
+      DateTime startOfMonth = DateTime(now.year, now.month, 1);
+      return orders.where((order) {
+        DateTime orderDate = DateFormat('yyyy-MM-dd').parse(order['date']);
+        return orderDate.isAfter(startOfMonth) && orderDate.isBefore(now.add(Duration(days: 1)));
+      }).toList();
+    } else {
+      return orders;
+    }
+  }
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
@@ -35,12 +131,6 @@ class SalesHistory extends StatelessWidget {
           appBar: PreferredSize(
             preferredSize: Size.fromHeight(45.0),
             child: AppBar(
-              title: Text(
-                "Order History",
-                style: TextStyle(
-                    fontFamily: GoogleFonts.poppins().fontFamily,
-                    color: Colors.white),
-              ),
               elevation: 0,
               leading: IconButton(
                 icon: Icon(
@@ -125,7 +215,9 @@ class SalesHistory extends StatelessWidget {
                                       size: 25,
                                       color: container1,
                                     ),
-                                    hintText: 'Select Date',
+                                    hintText: selectedDate != null
+                                        ? "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}"
+                                        : 'Select Date',
                                     hintStyle: TextStyle(
                                         fontFamily:
                                             GoogleFonts.poppins().fontFamily,
@@ -168,9 +260,9 @@ class SalesHistory extends StatelessWidget {
                                       },
                                     );
                                     if (pickedDate != null) {
-                                      String formattedDate =
-                                          "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
-                                      print(formattedDate);
+                                      setState(() {
+                                        selectedDate = pickedDate;
+                                      });
                                     }
                                   },
                                 ),
@@ -214,7 +306,6 @@ class SalesHistory extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          
                           ],
                         ),
                         SizedBox(height: 45),
@@ -234,9 +325,9 @@ class SalesHistory extends StatelessWidget {
                         Expanded(
                           child: TabBarView(
                             children: [
-                              buildCustomerListView(context, fontsize),
-                              buildCustomerListView(context, fontsize),
-                              buildCustomerListView(context, fontsize),
+                              buildCustomerListView(context, fontsize, 'All'),
+                              buildCustomerListView(context, fontsize, 'This Week'),
+                              buildCustomerListView(context, fontsize, 'This Month'),
                             ],
                           ),
                         ),
@@ -251,20 +342,14 @@ class SalesHistory extends StatelessWidget {
       ),
     );
   }
-
-  Widget buildCustomerListView(BuildContext context, double fontsize) {
-    // Sample order list with status
-    List<Map<String, String>> orders = [
-      {"orderNo": "12345", "status": "Completed"},
-      {"orderNo": "12346", "status": "Pending"},
-      {"orderNo": "12347", "status": "Completed"},
-      {"orderNo": "12348", "status": "Pending"},
-    ];
-
+Widget buildCustomerListView(BuildContext context, double fontsize, String filter) {
+    List<Map<String, dynamic>> filteredOrders = _filterOrders(filter);
     return ListView.builder(
-      itemCount: orders.length,
+      itemCount: filteredOrders.length,
       itemBuilder: (context, index) {
-        String status = orders[index]["status"]!;
+        final order = filteredOrders[index];
+        final soId = order["soId"];
+        String status = order["isDelivered"] ? "Delivered" : "Not Delivered";
         return Card(
           color: Colors.white,
           shape: RoundedRectangleBorder(
@@ -281,7 +366,7 @@ class SalesHistory extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'No: ${orders[index]["orderNo"]}',
+                      'OId: ${order["soId"]}',
                       style: GoogleFonts.poppins(
                         textStyle: TextStyle(
                           fontSize: fontsize * 0.04,
@@ -290,11 +375,11 @@ class SalesHistory extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Status: $status',
+                      '$status',
                       style: GoogleFonts.poppins(
                         textStyle: TextStyle(
                           fontSize: fontsize * 0.04,
-                          color: status == "Completed"
+                          color: status == "Delivered"
                               ? Colors.green
                               : Colors.red,
                         ),
@@ -304,19 +389,9 @@ class SalesHistory extends StatelessWidget {
                 ),
                 SizedBox(height: 10),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      ' Ahammed',
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(
-                          fontSize: fontsize * 0.035,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      'Total: \$100.00',
+                      ' ${order["date"]}',
                       style: GoogleFonts.poppins(
                         textStyle: TextStyle(
                           fontSize: fontsize * 0.035,
@@ -331,7 +406,7 @@ class SalesHistory extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      ' 2024-06-06 12:34 PM',
+                      'Total: ${order["total"]}',
                       style: GoogleFonts.poppins(
                         textStyle: TextStyle(
                           fontSize: fontsize * 0.035,
@@ -340,7 +415,7 @@ class SalesHistory extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Paycheck: \$90.00',
+                      'Payment Status: ${order["payStatus"]}',
                       style: GoogleFonts.poppins(
                         textStyle: TextStyle(
                           fontSize: fontsize * 0.035,
@@ -350,17 +425,46 @@ class SalesHistory extends StatelessWidget {
                     ),
                   ],
                 ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2.5),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () {
+                          // Add your print functionality here
+                        },
+                        icon: Icon(Icons.print, color: appbarcolor),
+                        label: Text(
+                          'Print',
+                          style: TextStyle(color: appbarcolor),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      TextButton.icon(
+                        onPressed: () {
+                          // Add your share functionality here
+                        },
+                        icon: Icon(Icons.share, color: appbarcolor),
+                        label: Text(
+                          'Share',
+                          style: TextStyle(color: appbarcolor),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
             onTap: () {
-              if (status == 'Completed') {
+              if (status == 'Delivered') {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => salescmplt()),
+                  MaterialPageRoute(builder: (context) => salescmplt(soId: soId,)),
                 );
               } else {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                      builder: (context) => orderdetail()),
+                      builder: (context) =>  OrderDetail(soId: soId,)),
                 );
               }
             },

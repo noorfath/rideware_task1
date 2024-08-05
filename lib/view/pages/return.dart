@@ -1,17 +1,88 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:rideware_task1/const.dart';
 import 'package:rideware_task1/view/pages/salesreturn.dart';
 
 class ReturnSalesPage extends StatefulWidget {
-  ReturnSalesPage({super.key});
+  final int userId;
+  final int customerId;
+
+  ReturnSalesPage({Key? key, required this.userId, required this.customerId}) : super(key: key);
 
   @override
   ReturnSalesPageState createState() => ReturnSalesPageState();
 }
 
 class ReturnSalesPageState extends State<ReturnSalesPage> {
+  List<Map<String, dynamic>> orders = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchSalesOrders();
+  }
+
+  Future<void> _fetchSalesOrders() async {
+    final url = 'http://testapi.wideviewers.com/Sales/GetAllSOUser';
+    final Map<String, dynamic> requestBody = {
+      'userId': widget.userId,
+      'customerId': widget.customerId,
+    };
+
+    try {
+      var response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      // Check for redirect
+      if (response.statusCode == 307) {
+        final newUrl = response.headers['location'];
+        if (newUrl != null) {
+          response = await http.post(
+            Uri.parse(newUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: jsonEncode(requestBody),
+          );
+        }
+      }
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+        if (jsonResponse['isValid']) {
+          final List<dynamic> data = jsonResponse['data'];
+          setState(() {
+            orders = data.map((order) => {
+              "soId": order["soId"],
+              "date": order["date"],
+              "total": order["total"],
+              "noOfItems": order["noItems"],
+              "time": order["time"]
+            }).toList();
+          });
+        } else {
+          print('Invalid response: ${jsonResponse['message']}');
+        }
+      } else {
+        print('Failed to load sales orders (status code: ${response.statusCode})');
+        print('Response body: ${response.body}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var height = MediaQuery.of(context).size.height;
@@ -21,8 +92,7 @@ class ReturnSalesPageState extends State<ReturnSalesPage> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness:
-            Brightness.dark, // Use Brightness.light for white icons
+        statusBarIconBrightness: Brightness.dark,
       ),
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -101,34 +171,13 @@ class ReturnSalesPageState extends State<ReturnSalesPage> {
                             left: 28.0, top: 20.0, right: 28.0),
                         child: Row(
                           children: [
-                            ElevatedButton(
-                              onPressed: () {},
-                              child: Text(
-                                'All',
-                                style: TextStyle(
-                                  fontFamily: GoogleFonts.poppins().fontFamily,
-                                  fontSize: fontsize * 0.04,
-                                  color: appbarcolor,
-                                ),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                fixedSize: Size(100, 45),
-                                backgroundColor:
-                                    Colors.white, // Replace with your color
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 10),
                             Expanded(
                               child: TextField(
                                 decoration: InputDecoration(
                                   contentPadding: EdgeInsets.all(10.0),
-                                  hintText: 'Search',
+                                  hintText: 'Search Orders',
                                   hintStyle: TextStyle(
-                                    fontFamily:
-                                        GoogleFonts.poppins().fontFamily,
+                                    fontFamily: GoogleFonts.poppins().fontFamily,
                                     fontSize: fontsize * 0.03,
                                   ),
                                   suffixIcon: Icon(
@@ -162,99 +211,104 @@ class ReturnSalesPageState extends State<ReturnSalesPage> {
       ),
     );
   }
-}
 
-Widget buildCustomerListView(BuildContext context, double fontsize) {
-  return ListView.builder(
-    physics:
-        NeverScrollableScrollPhysics(), // To prevent scrolling inside SingleChildScrollView
-    shrinkWrap: true, // To allow ListView to take minimum space needed
-    itemCount: 4,
-    itemBuilder: (context, index) {
-      return Card(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        elevation: 5,
-        margin: EdgeInsets.symmetric(vertical: 10),
-        child: ListTile(
-          contentPadding: EdgeInsets.all(10),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'No: 12345',
-                    style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                        fontSize: fontsize * 0.04,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    'No of items',
-                    style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                        fontSize: fontsize * 0.04,
-                        color: Colors.green,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Ahammed',
-                    style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                        fontSize: fontsize * 0.035,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '2024-06-06 12:34 PM',
-                    style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                        fontSize: fontsize * 0.035,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    'Total: \$100.00',
-                    style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                        fontSize: fontsize * 0.035,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+  Widget buildCustomerListView(BuildContext context, double fontsize) {
+    return ListView.builder(
+      physics: NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: orders.length,
+      itemBuilder: (context, index) {
+        final order = orders[index];
+        final time = (order["date"]?.contains('T') ?? false)
+            ? order["date"].split('T')[1]
+            : 'No time'; // Extract time or default value
+
+        return Card(
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
           ),
-          onTap: () {
-            Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (context) => SalesReturn()),
-            );
-          },
-        ),
-      );
-    },
-  );
+          elevation: 5,
+          margin: EdgeInsets.symmetric(vertical: 10),
+          child: ListTile(
+            contentPadding: EdgeInsets.all(10),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'OId: ${order["soId"]}',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                          fontSize: fontsize * 0.04,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      'No of items: ${order["noOfItems"]}',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                          fontSize: fontsize * 0.04,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Date: ${order["date"]?.split('T')[0]}',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                          fontSize: fontsize * 0.035,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      'Total: AED${order["total"]}',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                          fontSize: fontsize * 0.035,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Time: $time',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                          fontSize: fontsize * 0.035,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => SalesReturn(soId: order["soId"]),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
 }
